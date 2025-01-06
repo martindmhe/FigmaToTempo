@@ -19,6 +19,9 @@ const config = {
     ],
     "import/no-import-module-exports": "off",
   },
+  env: {
+    node: true
+  }
 };
 
 module.exports = config;

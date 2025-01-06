@@ -1,3 +1,5 @@
+/// <reference types="@figma/plugin-typings" />
+
 // Settings
 export type Framework = "Flutter" | "SwiftUI" | "HTML" | "Tailwind";
 

@@ -13,6 +13,7 @@ import {
   Warning,
 } from "types";
 import { postUISettingsChangingMessage } from "./messaging";
+import callOpenAI from "../../../packages/backend/src/ai/openai";
 
 interface AppState {
   code: string;
@@ -133,6 +134,10 @@ export default function App() {
 
   return (
     <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
+      <button onClick={async () => setState({
+        ...state,
+        code: await callOpenAI(`This code was generated from figma, please edit it to be more production ready, return only the code: ${state.code}`),
+      })}>Edit With AI</button>
       <PluginUI
         code={state.code}
         warnings={state.warnings}
