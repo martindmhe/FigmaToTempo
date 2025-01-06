@@ -27,6 +27,12 @@ interface AppState {
 }
 
 const emptyPreview = { size: { width: 0, height: 0 }, content: "" };
+
+const returnEditedCode = async (code: string) => {
+  const response = await callOpenAI(`${code}, This code was generated from Figma. Please refactor it to be production-ready, ensuring best practices are followed, and return only the updated code in plain text format. Do not include explanations, comments, or markdown.`)
+  return response.replace(/```[a-z]*\n?|\n?```/g, '')
+}
+
 export default function App() {
   const [state, setState] = useState<AppState>({
     code: "",
@@ -136,7 +142,7 @@ export default function App() {
     <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
       <button onClick={async () => setState({
         ...state,
-        code: await callOpenAI(`This code was generated from figma, please edit it to be more production ready, return only the code: ${state.code}`),
+        code: await returnEditedCode(state.code)
       })}>Edit With AI</button>
       <PluginUI
         code={state.code}
