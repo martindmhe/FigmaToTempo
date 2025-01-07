@@ -140,10 +140,6 @@ export default function App() {
 
   return (
     <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
-      <button onClick={async () => setState({
-        ...state,
-        code: await returnEditedCode(state.code)
-      })}>Edit With AI</button>
       <PluginUI
         code={state.code}
         warnings={state.warnings}
@@ -156,6 +152,10 @@ export default function App() {
         }
         colors={state.colors}
         gradients={state.gradients}
+        editWithAI={async () => setState({
+          ...state,
+          code: await returnEditedCode(state.code)
+        })}
       />
     </div>
   );

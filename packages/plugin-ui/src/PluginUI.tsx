@@ -28,6 +28,8 @@ type PluginUIProps = {
   onPreferenceChanged: (key: string, value: boolean | string) => void;
   colors: SolidColorConversion[];
   gradients: LinearGradientConversion[];
+  // temporary prop drilling
+  editWithAI: () => void;
 };
 
 const frameworks: Framework[] = ["HTML", "Tailwind", "Flutter", "SwiftUI"];
@@ -97,6 +99,7 @@ export const PluginUI = (props: PluginUIProps) => {
             selectPreferenceOptions={selectPreferenceOptions}
             settings={props.settings}
             onPreferenceChanged={props.onPreferenceChanged}
+            editWithAI={props.editWithAI}
           />
 
           {props.colors.length > 0 && (
