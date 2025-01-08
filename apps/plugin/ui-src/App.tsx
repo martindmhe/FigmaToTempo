@@ -12,7 +12,7 @@ import {
   SettingsChangedMessage,
   Warning,
 } from "types";
-import { postUISettingsChangingMessage } from "./messaging";
+import { postUISettingsChangingMessage, requestSelectedData } from "./messaging";
 import callOpenAI from "../../../packages/backend/src/ai/openai";
 
 interface AppState {
@@ -45,6 +45,8 @@ export default function App() {
     warnings: [],
   });
 
+  const [context, setContext] = useState<string>();
+
   const rootStyles = getComputedStyle(document.documentElement);
   const figmaColorBgValue = rootStyles
     .getPropertyValue("--figma-color-bg")
@@ -72,6 +74,11 @@ export default function App() {
             settings: settingsMessage.settings,
             selectedFramework: settingsMessage.settings.framework,
           }));
+          break;
+
+        case "selectedDataResponse":
+          console.log("Selected Data:", untypedMessage.data);
+          setContext(untypedMessage.data);
           break;
 
         case "empty":
@@ -139,26 +146,31 @@ export default function App() {
   console.log("state.code", state.code.slice(0, 25));
 
   const handleOpenTempo = async () => {
-    const response = await fetch('http://localhost:3001/figma/storeContext', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        figma_context: "{}",
-        initial_code: state.code,
-        user_id: "12345",
-      }
-      ),
-    })
 
-    const jsonResponse = await response.json();
-    const id = jsonResponse[0].id;
+    requestSelectedData();
 
-    // temporarily hardcoding values
-    const canvas_id = "50699c73-94c9-4959-807e-c33e298fb064"
+    console.log("figma context", context);
 
-    window.open(`http://localhost:3050/canvases/${canvas_id}/editor?figmaContextId=${id}`, '_blank');
+    // const response = await fetch('http://localhost:3001/figma/storeContext', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ 
+    //     figma_context: context,
+    //     initial_code: state.code,
+    //     user_id: "12345",
+    //   }
+    //   ),
+    // })
+
+    // const jsonResponse = await response.json();
+    // const id = jsonResponse[0].id;
+
+    // // temporarily hardcoding values
+    // const base_url = "http://localhost:3050/canvases/8f86f76c-dd0d-4cd3-9ec2-b4ffb7cbbb64/editor"
+
+    // window.open(`${base_url}?figmaContextId=${id}`, '_blank');
   }
 
   return (

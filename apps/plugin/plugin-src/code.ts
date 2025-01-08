@@ -98,6 +98,108 @@ const standardMode = async () => {
       figma.clientStorage.setAsync("userPluginSettings", userPluginSettings);
       safeRun(userPluginSettings);
     }
+    
+    if (msg.type === "requestSelectedData") {
+      // Collect selected node data
+      const selection = figma.currentPage.selection;
+
+      const parseSelectedData = (nodeList: any) => {
+        return nodeList.map((node: any) => {
+
+          const data: any = {
+            id: node.id,
+            name: node.name,
+            type: node.type,
+            visible: node.visible,
+            locked: node.locked,
+            parent: node.parent?.id || null,
+            x: node.x,
+            y: node.y,
+          };
+    
+          // Additional fields based on node type
+          if (node.type === "TEXT") {
+            const textNode = node as TextNode;
+            Object.assign(data, {
+              characters: textNode.characters,
+              fontSize: textNode.fontSize,
+              fontName: textNode.fontName,
+              textAlignHorizontal: textNode.textAlignHorizontal,
+              textAlignVertical: textNode.textAlignVertical,
+              lineHeight: textNode.lineHeight,
+              letterSpacing: textNode.letterSpacing,
+              fills: textNode.fills,
+            });
+          } else if (node.type === "FRAME") {
+            const frameNode = node as FrameNode;
+            Object.assign(data, {
+              children: frameNode.children.map((child) => child.id),
+              layoutMode: frameNode.layoutMode,
+              paddingLeft: frameNode.paddingLeft,
+              paddingRight: frameNode.paddingRight,
+              paddingTop: frameNode.paddingTop,
+              paddingBottom: frameNode.paddingBottom,
+              itemSpacing: frameNode.itemSpacing,
+              fills: frameNode.fills,
+              strokes: frameNode.strokes,
+              cornerRadius: frameNode.cornerRadius,
+            });
+          } else if (node.type === "RECTANGLE") {
+            const rectNode = node as RectangleNode;
+            Object.assign(data, {
+              width: rectNode.width,
+              height: rectNode.height,
+              cornerRadius: rectNode.cornerRadius,
+              fills: rectNode.fills,
+              strokes: rectNode.strokes,
+              strokeWeight: rectNode.strokeWeight,
+            });
+          } else if (node.type === "ELLIPSE") {
+            const ellipseNode = node as EllipseNode;
+            Object.assign(data, {
+              width: ellipseNode.width,
+              height: ellipseNode.height,
+              fills: ellipseNode.fills,
+              strokes: ellipseNode.strokes,
+              strokeWeight: ellipseNode.strokeWeight,
+              arcData: ellipseNode.arcData,
+            });
+          } else if (node.type === "GROUP") {
+            const groupNode = node as GroupNode;
+            Object.assign(data, {
+              children: parseSelectedData(groupNode.children),
+            });
+          } else if (node.type === "LINE") {
+            const lineNode = node as LineNode;
+            Object.assign(data, {
+              width: lineNode.width,
+              strokes: lineNode.strokes,
+              strokeWeight: lineNode.strokeWeight,
+            });
+          } else if (node.type === "VECTOR") {
+            const vectorNode = node as VectorNode;
+            Object.assign(data, {
+              vectorPaths: vectorNode.vectorPaths,
+              fills: vectorNode.fills,
+              strokes: vectorNode.strokes,
+              strokeWeight: vectorNode.strokeWeight,
+            });
+          }
+    
+          return data;
+        })
+
+      }
+
+      const selectedData = parseSelectedData(selection);
+  
+      // Send the data back to the UI
+      figma.ui.postMessage({
+        type: "selectedDataResponse",
+        data: JSON.stringify(selectedData, null, 2), // Pretty print
+      });
+    }
+
   };
 };
 

@@ -23,3 +23,10 @@ export const postUISettingsChangingMessage = <T>(
   };
   postUIMessage(message, options);
 };
+
+export const requestSelectedData = (options?: WindowPostMessageOptions) => {
+  const message: Message = {
+    type: "requestSelectedData",
+  };
+  parent.postMessage({pluginMessage: message}, "*");
+};
