@@ -24,7 +24,8 @@ export const postUISettingsChangingMessage = <T>(
   postUIMessage(message, options);
 };
 
-export const requestSelectedData = (options?: WindowPostMessageOptions) => {
+export const triggerOpenTempo = (options?: WindowPostMessageOptions) => {
+  // fetch necessary selected data as context
   const message: Message = {
     type: "requestSelectedData",
   };

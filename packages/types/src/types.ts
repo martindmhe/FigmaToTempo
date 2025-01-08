@@ -49,6 +49,11 @@ export type SettingsChangedMessage = Message & {
   type: "pluginSettingsChanged";
   settings: PluginSettings;
 };
+export type RequestSelectedDataMessage = Message & {
+  type: "requestSelectedData";
+  data: string;
+};
+
 export type ErrorMessage = Message & {
   type: "error";
   error: string;

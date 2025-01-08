@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { PluginUI } from "plugin-ui";
 import {
   Framework,
@@ -10,10 +10,12 @@ import {
   SolidColorConversion,
   ErrorMessage,
   SettingsChangedMessage,
+  RequestSelectedDataMessage,
   Warning,
 } from "types";
-import { postUISettingsChangingMessage, requestSelectedData } from "./messaging";
+import { postUISettingsChangingMessage, triggerOpenTempo } from "./messaging";
 import callOpenAI from "../../../packages/backend/src/ai/openai";
+import { c } from "vite/dist/node/types.d-aGj9QkWt";
 
 interface AppState {
   code: string;
@@ -45,8 +47,6 @@ export default function App() {
     warnings: [],
   });
 
-  const [context, setContext] = useState<string>();
-
   const rootStyles = getComputedStyle(document.documentElement);
   const figmaColorBgValue = rootStyles
     .getPropertyValue("--figma-color-bg")
@@ -77,8 +77,15 @@ export default function App() {
           break;
 
         case "selectedDataResponse":
-          console.log("Selected Data:", untypedMessage.data);
-          setContext(untypedMessage.data);
+          const selectedData = untypedMessage as RequestSelectedDataMessage;
+          const context = selectedData.data ?? "{}";
+
+          setState((prevState) => {
+            console.log(prevState.code);
+            handleOpenTempo(context, prevState.code);
+            return prevState;
+          });
+
           break;
 
         case "empty":
@@ -143,34 +150,32 @@ export default function App() {
       targetOrigin: "*",
     });
   };
-  console.log("state.code", state.code.slice(0, 25));
+  // console.log("state.code", state.code.slice(0, 25));
 
-  const handleOpenTempo = async () => {
+  const handleOpenTempo = async (context: string, code: string) => {
 
-    requestSelectedData();
-
-    console.log("figma context", context);
-
-    // const response = await fetch('http://localhost:3001/figma/storeContext', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ 
-    //     figma_context: context,
-    //     initial_code: state.code,
-    //     user_id: "12345",
-    //   }
-    //   ),
-    // })
-
-    // const jsonResponse = await response.json();
-    // const id = jsonResponse[0].id;
-
-    // // temporarily hardcoding values
-    // const base_url = "http://localhost:3050/canvases/8f86f76c-dd0d-4cd3-9ec2-b4ffb7cbbb64/editor"
-
-    // window.open(`${base_url}?figmaContextId=${id}`, '_blank');
+    if (context) {
+      const response = await fetch('http://localhost:3001/figma/storeContext', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          figma_context: context,
+          initial_code: code,
+          user_id: "12345",
+        }
+        ),
+      })
+  
+      const jsonResponse = await response.json();
+      const id = jsonResponse[0].id;
+  
+      // temporarily hardcoding values
+      const base_url = "http://localhost:3050/canvases/8f86f76c-dd0d-4cd3-9ec2-b4ffb7cbbb64/editor"
+  
+      window.open(`${base_url}?figmaContextId=${id}`, '_blank');
+    }
   }
 
   return (
@@ -187,7 +192,7 @@ export default function App() {
         }
         colors={state.colors}
         gradients={state.gradients}
-        openTempo={handleOpenTempo}
+        openTempo={triggerOpenTempo}
       />
     </div>
   );
