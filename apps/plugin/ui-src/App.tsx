@@ -138,6 +138,29 @@ export default function App() {
   };
   console.log("state.code", state.code.slice(0, 25));
 
+  const handleOpenTempo = async () => {
+    const response = await fetch('http://localhost:3001/figma/storeContext', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        figma_context: "{}",
+        initial_code: state.code,
+        user_id: "12345",
+      }
+      ),
+    })
+
+    const jsonResponse = await response.json();
+    const id = jsonResponse[0].id;
+
+    // temporarily hardcoding values
+    const canvas_id = "50699c73-94c9-4959-807e-c33e298fb064"
+
+    window.open(`http://localhost:3050/canvases/${canvas_id}/editor?figmaContextId=${id}`, '_blank');
+  }
+
   return (
     <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
       <PluginUI
@@ -152,10 +175,7 @@ export default function App() {
         }
         colors={state.colors}
         gradients={state.gradients}
-        editWithAI={async () => setState({
-          ...state,
-          code: await returnEditedCode(state.code)
-        })}
+        openTempo={handleOpenTempo}
       />
     </div>
   );
