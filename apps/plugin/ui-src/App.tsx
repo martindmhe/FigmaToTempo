@@ -79,10 +79,13 @@ export default function App() {
         case "selectedDataResponse":
           const selectedData = untypedMessage as RequestSelectedDataMessage;
           const context = selectedData.data ?? "{}";
+          const { url } = selectedData;
+
+          console.log(url)
 
           setState((prevState) => {
             console.log(prevState.code);
-            handleOpenTempo(context, prevState.code);
+            // handleOpenTempo(context, prevState.code);
             return prevState;
           });
 
@@ -172,7 +175,7 @@ export default function App() {
       const id = jsonResponse[0].id;
   
       // temporarily hardcoding values
-      const base_url = "http://localhost:3050/canvases/8f86f76c-dd0d-4cd3-9ec2-b4ffb7cbbb64/editor"
+      const base_url = `http://localhost:3050/canvases/c876fb21-bbd7-4a69-9f63-c08760697502/editor`
   
       window.open(`${base_url}?figmaContextId=${id}`, '_blank');
     }

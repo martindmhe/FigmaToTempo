@@ -89,7 +89,7 @@ const standardMode = async () => {
     safeRun(userPluginSettings);
   });
 
-  figma.ui.onmessage = (msg) => {
+  figma.ui.onmessage = async (msg) => {
     console.log("[node] figma.ui.onmessage", msg);
 
     if (msg.type === "pluginSettingWillChange") {
@@ -191,13 +191,32 @@ const standardMode = async () => {
 
       }
 
-      const selectedData = parseSelectedData(selection);
-  
-      // Send the data back to the UI
-      figma.ui.postMessage({
-        type: "selectedDataResponse",
-        data: JSON.stringify(selectedData, null, 2), // Pretty print
+      const frame = selection[0];
+
+      const pngData = await frame.exportAsync({
+        format: "PNG",
+        constraint: { type: "SCALE", value: 2 }
       });
+
+      const base64PNG = figma.base64Encode(pngData);
+
+      try {
+        const response = await fetch("http://localhost:3001/figma/uploadPNG", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ pngData: base64PNG })
+        });
+        const responseData = await response.json();
+        figma.ui.postMessage({
+          type: "selectedDataResponse",
+          data: "{}",
+          imageURL: responseData.url,
+        });
+      } catch (error) {
+        console.error(error);
+      }
     }
 
   };

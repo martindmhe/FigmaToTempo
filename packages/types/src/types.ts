@@ -52,6 +52,7 @@ export type SettingsChangedMessage = Message & {
 export type RequestSelectedDataMessage = Message & {
   type: "requestSelectedData";
   data: string;
+  url: string;
 };
 
 export type ErrorMessage = Message & {
