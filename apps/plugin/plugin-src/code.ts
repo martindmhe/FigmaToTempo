@@ -212,7 +212,7 @@ const standardMode = async () => {
         figma.ui.postMessage({
           type: "selectedDataResponse",
           data: "{}",
-          imageURL: responseData.url,
+          url: responseData.url,
         });
       } catch (error) {
         console.error(error);
