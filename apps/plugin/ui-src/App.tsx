@@ -80,12 +80,9 @@ export default function App() {
           const selectedData = untypedMessage as RequestSelectedDataMessage;
           const context = selectedData.data ?? "{}";
           const { url } = selectedData;
-
-          console.log(url)
-
+          
           setState((prevState) => {
-            console.log(prevState.code);
-            // handleOpenTempo(context, prevState.code);
+            handleOpenTempo(url, prevState.code, context);
             return prevState;
           });
 
@@ -155,9 +152,10 @@ export default function App() {
   };
   // console.log("state.code", state.code.slice(0, 25));
 
-  const handleOpenTempo = async (context: string, code: string) => {
+  const handleOpenTempo = async (image_url: string, code: string, context: string = "") => {
 
-    if (context) {
+
+      console.log(image_url, code, context)
       const response = await fetch('http://localhost:3001/figma/storeContext', {
         method: 'POST',
         headers: {
@@ -166,7 +164,8 @@ export default function App() {
         body: JSON.stringify({ 
           figma_context: context,
           initial_code: code,
-          user_id: "12345",
+          user_id: "123456789",
+          image_url: image_url
         }
         ),
       })
@@ -177,8 +176,8 @@ export default function App() {
       // temporarily hardcoding values
       const base_url = `http://localhost:3050/canvases/c876fb21-bbd7-4a69-9f63-c08760697502/editor`
   
-      window.open(`${base_url}?figmaContextId=${id}`, '_blank');
-    }
+      // window.open(`${base_url}?figmaContextId=${id}`, '_blank');
+
   }
 
   return (
