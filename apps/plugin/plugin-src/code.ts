@@ -103,93 +103,93 @@ const standardMode = async () => {
       // Collect selected node data
       const selection = figma.currentPage.selection;
 
-      const parseSelectedData = (nodeList: any) => {
-        return nodeList.map((node: any) => {
+      // const parseSelectedData = (nodeList: any) => {
+      //   return nodeList.map((node: any) => {
 
-          const data: any = {
-            id: node.id,
-            name: node.name,
-            type: node.type,
-            visible: node.visible,
-            locked: node.locked,
-            parent: node.parent?.id || null,
-            x: node.x,
-            y: node.y,
-          };
+      //     const data: any = {
+      //       id: node.id,
+      //       name: node.name,
+      //       type: node.type,
+      //       visible: node.visible,
+      //       locked: node.locked,
+      //       parent: node.parent?.id || null,
+      //       x: node.x,
+      //       y: node.y,
+      //     };
     
-          // Additional fields based on node type
-          if (node.type === "TEXT") {
-            const textNode = node as TextNode;
-            Object.assign(data, {
-              characters: textNode.characters,
-              fontSize: textNode.fontSize,
-              fontName: textNode.fontName,
-              textAlignHorizontal: textNode.textAlignHorizontal,
-              textAlignVertical: textNode.textAlignVertical,
-              lineHeight: textNode.lineHeight,
-              letterSpacing: textNode.letterSpacing,
-              fills: textNode.fills,
-            });
-          } else if (node.type === "FRAME") {
-            const frameNode = node as FrameNode;
-            Object.assign(data, {
-              children: frameNode.children.map((child) => child.id),
-              layoutMode: frameNode.layoutMode,
-              paddingLeft: frameNode.paddingLeft,
-              paddingRight: frameNode.paddingRight,
-              paddingTop: frameNode.paddingTop,
-              paddingBottom: frameNode.paddingBottom,
-              itemSpacing: frameNode.itemSpacing,
-              fills: frameNode.fills,
-              strokes: frameNode.strokes,
-              cornerRadius: frameNode.cornerRadius,
-            });
-          } else if (node.type === "RECTANGLE") {
-            const rectNode = node as RectangleNode;
-            Object.assign(data, {
-              width: rectNode.width,
-              height: rectNode.height,
-              cornerRadius: rectNode.cornerRadius,
-              fills: rectNode.fills,
-              strokes: rectNode.strokes,
-              strokeWeight: rectNode.strokeWeight,
-            });
-          } else if (node.type === "ELLIPSE") {
-            const ellipseNode = node as EllipseNode;
-            Object.assign(data, {
-              width: ellipseNode.width,
-              height: ellipseNode.height,
-              fills: ellipseNode.fills,
-              strokes: ellipseNode.strokes,
-              strokeWeight: ellipseNode.strokeWeight,
-              arcData: ellipseNode.arcData,
-            });
-          } else if (node.type === "GROUP") {
-            const groupNode = node as GroupNode;
-            Object.assign(data, {
-              children: parseSelectedData(groupNode.children),
-            });
-          } else if (node.type === "LINE") {
-            const lineNode = node as LineNode;
-            Object.assign(data, {
-              width: lineNode.width,
-              strokes: lineNode.strokes,
-              strokeWeight: lineNode.strokeWeight,
-            });
-          } else if (node.type === "VECTOR") {
-            const vectorNode = node as VectorNode;
-            Object.assign(data, {
-              vectorPaths: vectorNode.vectorPaths,
-              fills: vectorNode.fills,
-              strokes: vectorNode.strokes,
-              strokeWeight: vectorNode.strokeWeight,
-            });
-          }
+      //     // Additional fields based on node type
+      //     if (node.type === "TEXT") {
+      //       const textNode = node as TextNode;
+      //       Object.assign(data, {
+      //         characters: textNode.characters,
+      //         fontSize: textNode.fontSize,
+      //         fontName: textNode.fontName,
+      //         textAlignHorizontal: textNode.textAlignHorizontal,
+      //         textAlignVertical: textNode.textAlignVertical,
+      //         lineHeight: textNode.lineHeight,
+      //         letterSpacing: textNode.letterSpacing,
+      //         fills: textNode.fills,
+      //       });
+      //     } else if (node.type === "FRAME") {
+      //       const frameNode = node as FrameNode;
+      //       Object.assign(data, {
+      //         children: frameNode.children.map((child) => child.id),
+      //         layoutMode: frameNode.layoutMode,
+      //         paddingLeft: frameNode.paddingLeft,
+      //         paddingRight: frameNode.paddingRight,
+      //         paddingTop: frameNode.paddingTop,
+      //         paddingBottom: frameNode.paddingBottom,
+      //         itemSpacing: frameNode.itemSpacing,
+      //         fills: frameNode.fills,
+      //         strokes: frameNode.strokes,
+      //         cornerRadius: frameNode.cornerRadius,
+      //       });
+      //     } else if (node.type === "RECTANGLE") {
+      //       const rectNode = node as RectangleNode;
+      //       Object.assign(data, {
+      //         width: rectNode.width,
+      //         height: rectNode.height,
+      //         cornerRadius: rectNode.cornerRadius,
+      //         fills: rectNode.fills,
+      //         strokes: rectNode.strokes,
+      //         strokeWeight: rectNode.strokeWeight,
+      //       });
+      //     } else if (node.type === "ELLIPSE") {
+      //       const ellipseNode = node as EllipseNode;
+      //       Object.assign(data, {
+      //         width: ellipseNode.width,
+      //         height: ellipseNode.height,
+      //         fills: ellipseNode.fills,
+      //         strokes: ellipseNode.strokes,
+      //         strokeWeight: ellipseNode.strokeWeight,
+      //         arcData: ellipseNode.arcData,
+      //       });
+      //     } else if (node.type === "GROUP") {
+      //       const groupNode = node as GroupNode;
+      //       Object.assign(data, {
+      //         children: parseSelectedData(groupNode.children),
+      //       });
+      //     } else if (node.type === "LINE") {
+      //       const lineNode = node as LineNode;
+      //       Object.assign(data, {
+      //         width: lineNode.width,
+      //         strokes: lineNode.strokes,
+      //         strokeWeight: lineNode.strokeWeight,
+      //       });
+      //     } else if (node.type === "VECTOR") {
+      //       const vectorNode = node as VectorNode;
+      //       Object.assign(data, {
+      //         vectorPaths: vectorNode.vectorPaths,
+      //         fills: vectorNode.fills,
+      //         strokes: vectorNode.strokes,
+      //         strokeWeight: vectorNode.strokeWeight,
+      //       });
+      //     }
     
-          return data;
-        })
+      //     return data;
+      //   })
 
-      }
+      // }
 
       const frame = selection[0];
 
@@ -217,6 +217,54 @@ const standardMode = async () => {
       } catch (error) {
         console.error(error);
       }
+    }
+
+    if (msg.type === "auth") {
+      figma.clientStorage.getAsync("auth_token").then((token) => {
+        if (token) {
+          figma.ui.postMessage({ type: "auth_token", token });
+        } 
+      });
+      const keysResponse = await fetch("http://localhost:3001/figma/auth/generateKeys");
+      const { read_key, write_key } = await keysResponse.json();
+      console.log("Keys:", read_key, write_key);
+      figma.showUI(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>OAuth Login</title>
+          </head>
+          <body>
+            <h1>Loading...</h1>
+            <script>
+            console.log("test")
+              window.location.href = "http://localhost:3001/figma/auth/login?write_key=${write_key}";
+            </script>
+          </body>
+        </html>
+    `, { width: 400, height: 400 });
+
+      const checkAuth = async () => {
+        try {
+          const response = await fetch(`http://localhost:3001/figma/auth/${read_key}`);
+          const data = await response.json();
+          console.log("Auth check response:", data);
+          if (data[0].auth_token) {
+            const auth_token = data[0].auth_token;
+            // await figma.clientStorage.setAsync("auth_token", data.token);
+            console.log("Received token:", auth_token);
+            figma.ui.postMessage({ type: "auth_token", token: auth_token });
+            return;
+          }
+        } catch (error) {
+          console.error("Auth check failed:", error);
+        }
+        
+        setTimeout(checkAuth, 1000);
+      };
+
+      checkAuth();
+
     }
 
   };

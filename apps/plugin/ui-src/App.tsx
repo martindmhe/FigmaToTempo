@@ -80,12 +80,16 @@ export default function App() {
           const selectedData = untypedMessage as RequestSelectedDataMessage;
           const context = selectedData.data ?? "{}";
           const { url } = selectedData;
-          
+
           setState((prevState) => {
             handleOpenTempo(url, prevState.code, context);
             return prevState;
           });
 
+          break;
+        
+        case "auth":
+          console.log("auth", untypedMessage);
           break;
 
         case "empty":
@@ -174,14 +178,42 @@ export default function App() {
       const id = jsonResponse[0].id;
   
       // temporarily hardcoding values
-      const base_url = `http://localhost:3050/canvases/c876fb21-bbd7-4a69-9f63-c08760697502/editor`
+      const base_url = `http://localhost:3050/canvases/7f594afe-3f5a-4d1f-bb5d-0ca4c4dd58a1/editor`
   
-      // window.open(`${base_url}?figmaContextId=${id}`, '_blank');
+      window.open(`${base_url}?figmaContextId=${id}`, '_blank');
 
+  }
+
+  const handleCreateTempo = async (image_url: string, code: string, context: string = "") => {
+    console.log(image_url, code, context)
+      const response = await fetch('http://localhost:3001/figma/createNewProject', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          figma_context: context,
+          initial_code: code,
+          user_id: "123456789",
+          image_url: image_url
+        }
+        ),
+      })
+  
+      const jsonResponse = await response.json();
+      const id = jsonResponse[0].id;
+  
+      // temporarily hardcoding values
+      const base_url = `http://localhost:3050/canvases/e7299cf0-b520-4ac5-80a0-24f9f1c75eeb/editor`
+  
+      window.open(`${base_url}?figmaContextId=${id}`, '_blank');
   }
 
   return (
     <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
+      <button onClick={() => {
+       parent.postMessage({ pluginMessage: { type: "auth" } }, '*');
+      }}>Login To Tempo</button>
       <PluginUI
         code={state.code}
         warnings={state.warnings}

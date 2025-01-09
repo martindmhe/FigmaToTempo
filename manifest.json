@@ -8,7 +8,7 @@
   "capabilities": ["inspect", "codegen", "vscode"],
   "permissions": [],
   "networkAccess": {
-    "allowedDomains": ["https://api.openai.com"],
+    "allowedDomains": ["https://api.openai.com", "https://tempolabs.us.auth0.com/"],
     "devAllowedDomains": ["http://localhost:3001"]
   },
   "codegenLanguages": [
