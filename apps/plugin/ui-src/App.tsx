@@ -282,7 +282,7 @@ export default function App() {
 
     const createProjectResponse = await axios.post('http://localhost:3001/figma/addToNew', { 
       github_token: authTokens.github_token,
-      component_name: name,
+      component_name: name.replace(" ", "_").toLowerCase(),
     }, {
       headers: {
         Authorization: `Bearer ${authTokens.supabase_token}`,
