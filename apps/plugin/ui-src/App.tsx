@@ -13,6 +13,7 @@ import {
   ReturnSelectedDataMessage,
   AuthMessage,
   Warning,
+  Canvas
 } from "types";
 import { postUISettingsChangingMessage, triggerOpenTempo } from "./messaging";
 import callOpenAI from "../../../packages/backend/src/ai/openai";
@@ -93,7 +94,12 @@ export default function App() {
       const fetchCanvases = async () => {
         const { data, error } = await supabaseClient
           .from("canvases")
-          .select("*")
+          .select(`
+            *,
+            projects:project_id (
+              name
+            )
+          `)
           .eq("owner_user_id", authTokens.user_id)
           .eq("env", "DEV");
 
@@ -102,10 +108,13 @@ export default function App() {
         }
 
         if (data) {
-          setCanvases(data);
-          console.log("canvases:", data);
+          const canvasesWithProjectNames = data.map(canvas => ({
+            ...canvas,
+            project_name: canvas.projects?.name
+          }));
+          setCanvases(canvasesWithProjectNames);
+          console.log("canvases:", canvasesWithProjectNames);
         }
-
       };
 
       fetchCanvases();
@@ -336,7 +345,7 @@ export default function App() {
           colors={state.colors}
           gradients={state.gradients}
           openTempo={triggerOpenTempo}
-          userCanvases={canvases.map((canvas) => canvas.id)}
+          userCanvases={canvases.map((canvas) => ({canvas_id: canvas.id, project_name: canvas.project_name}))}
         />
       </div>
     );

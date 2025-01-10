@@ -214,3 +214,8 @@ export interface LocalCodegenPreferenceOptions extends PreferenceOptions {
   value?: boolean;
   isDefault?: boolean;
 }
+
+export interface Canvas {
+  canvas_id: string;
+  project_name: string;
+}

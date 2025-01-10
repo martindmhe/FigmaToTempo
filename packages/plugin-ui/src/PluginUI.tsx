@@ -18,6 +18,8 @@ import {
   selectPreferenceOptions,
 } from "./codegenPreferenceOptions";
 
+import { Canvas } from "types";
+
 type PluginUIProps = {
   code: string;
   htmlPreview: HTMLPreview;
@@ -30,7 +32,7 @@ type PluginUIProps = {
   gradients: LinearGradientConversion[];
   // temporary prop drilling
   openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
-  userCanvases: string[];
+  userCanvases: Canvas[];
 };
 
 const frameworks: Framework[] = ["HTML", "Tailwind", "Flutter", "SwiftUI"];

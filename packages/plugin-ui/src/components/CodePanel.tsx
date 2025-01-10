@@ -3,6 +3,7 @@ import {
   LocalCodegenPreferenceOptions,
   PluginSettings,
   SelectPreferenceOptions,
+  Canvas
 } from "types";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -18,7 +19,7 @@ interface CodePanelProps {
   selectPreferenceOptions: SelectPreferenceOptions[];
   onPreferenceChanged: (key: string, value: boolean | string) => void;
   openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
-  userCanvases: string[];
+  userCanvases: Canvas[];
 }
 
 const CodePanel = (props: CodePanelProps) => {
@@ -59,7 +60,6 @@ const CodePanel = (props: CodePanelProps) => {
         </p>
         {isEmpty === false && (
           <>
-            
             <button
               className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
                 isPressed
@@ -77,31 +77,33 @@ const CodePanel = (props: CodePanelProps) => {
       </div>
       {isEmpty === false && (
         <div className="flex items-center gap-4 w-full">
-          <button
-              className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
-                isPressed
-                  ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
-                  : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
-              }`}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              onMouseEnter={handleButtonHover}
-              onMouseLeave={handleButtonLeave}
-            >
-              Open in existing Tempo app
-            </button>
-            {isDropdownOpen && (
-              <div className="dropdown-menu">
-                {props.userCanvases.map((canvas, idx) => (
+          <div className="flex flex-col gap-2">
+            <button
+                className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
+                  isPressed
+                    ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
+                    : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
+                }`}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onMouseEnter={handleButtonHover}
+                onMouseLeave={handleButtonLeave}
+              >
+                Open in existing Tempo app
+              </button>
+                {isDropdownOpen && (
+                <div className="absolute mt-10 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
+                  {props.userCanvases.map((canvas, idx) => (
                   <button
                     key={idx}
-                    className="dropdown-item"
-                    onClick={() => props.openTempo("existing", canvas)}
+                    className="w-full px-4 py-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200"
+                    onClick={() => props.openTempo("existing", canvas.canvas_id)}
                   >
-                    {canvas}
+                    {canvas.project_name}
                   </button>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+                )}
+          </div>
             <button
               className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
                 isPressed
