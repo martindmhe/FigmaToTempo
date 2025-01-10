@@ -220,11 +220,13 @@ const standardMode = async () => {
     }
 
     if (msg.type === "auth") {
-      figma.clientStorage.getAsync("auth_token").then((token) => {
-        if (token) {
-          figma.ui.postMessage({ type: "auth_token", token });
-        } 
-      });
+      const token = await figma.clientStorage.getAsync("auth_token");
+      if (token) {
+        console.log("cached token found");
+        figma.ui.postMessage({ type: "auth_token", token });
+        return;
+      }
+
       const keysResponse = await fetch("http://localhost:3001/figma/auth/generateKeys");
       const { read_key, write_key } = await keysResponse.json();
       console.log("Keys:", read_key, write_key);
@@ -237,7 +239,7 @@ const standardMode = async () => {
           <body>
             <h1>Loading...</h1>
             <script>
-            console.log("test")
+              console.log("test")
               window.location.href = "http://localhost:3001/figma/auth/login?write_key=${write_key}";
             </script>
           </body>
@@ -251,9 +253,17 @@ const standardMode = async () => {
           console.log("Auth check response:", data);
           if (data[0].auth_token) {
             const auth_token = data[0].auth_token;
-            // await figma.clientStorage.setAsync("auth_token", data.token);
+
+            await figma.clientStorage.setAsync("auth_token", auth_token);
+
             console.log("Received token:", auth_token);
+
+            figma.showUI(__html__, { width: 450, height: 700, themeColors: true })
+
             figma.ui.postMessage({ type: "auth_token", token: auth_token });
+
+            // figma.closePlugin();
+
             return;
           }
         } catch (error) {

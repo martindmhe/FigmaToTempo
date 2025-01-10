@@ -11,6 +11,7 @@ import {
   ErrorMessage,
   SettingsChangedMessage,
   RequestSelectedDataMessage,
+  AuthMessage,
   Warning,
 } from "types";
 import { postUISettingsChangingMessage, triggerOpenTempo } from "./messaging";
@@ -46,6 +47,7 @@ export default function App() {
     gradients: [],
     warnings: [],
   });
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
   const rootStyles = getComputedStyle(document.documentElement);
   const figmaColorBgValue = rootStyles
@@ -88,8 +90,16 @@ export default function App() {
 
           break;
         
-        case "auth":
-          console.log("auth", untypedMessage);
+        case "auth_token":
+          const authData = untypedMessage as AuthMessage;
+          console.log("authenticated: ", authData)
+          if (authData.token) {
+            console.log("setting auth token")
+            setAuthToken(authData.token);
+          } else {
+            setAuthToken(null);
+          }
+
           break;
 
         case "empty":
@@ -144,6 +154,10 @@ export default function App() {
     ) : null;
   }
 
+  useEffect(() => {
+    console.log("authToken updated:", authToken);
+  }, [authToken]);
+
   const handleFrameworkChange = (updatedFramework: Framework) => {
     setState((prevState) => ({
       ...prevState,
@@ -196,8 +210,7 @@ export default function App() {
           initial_code: code,
           user_id: "123456789",
           image_url: image_url
-        }
-        ),
+        }),
       })
   
       const jsonResponse = await response.json();
@@ -209,25 +222,36 @@ export default function App() {
       window.open(`${base_url}?figmaContextId=${id}`, '_blank');
   }
 
+  if (authToken) {
+
+    return (
+      <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
+        <PluginUI
+          code={state.code}
+          warnings={state.warnings}
+          selectedFramework={state.selectedFramework}
+          setSelectedFramework={handleFrameworkChange}
+          htmlPreview={state.htmlPreview}
+          settings={state.settings}
+          onPreferenceChanged={(key: string, value: boolean | string) =>
+            postUISettingsChangingMessage(key, value, { targetOrigin: "*" })
+          }
+          colors={state.colors}
+          gradients={state.gradients}
+          openTempo={triggerOpenTempo}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
-      <button onClick={() => {
-       parent.postMessage({ pluginMessage: { type: "auth" } }, '*');
-      }}>Login To Tempo</button>
-      <PluginUI
-        code={state.code}
-        warnings={state.warnings}
-        selectedFramework={state.selectedFramework}
-        setSelectedFramework={handleFrameworkChange}
-        htmlPreview={state.htmlPreview}
-        settings={state.settings}
-        onPreferenceChanged={(key: string, value: boolean | string) =>
-          postUISettingsChangingMessage(key, value, { targetOrigin: "*" })
-        }
-        colors={state.colors}
-        gradients={state.gradients}
-        openTempo={triggerOpenTempo}
-      />
+    <div className="flex w-full h-full items-center justify-center">
+      <button className="p-8" onClick={() => {
+        parent.postMessage({ pluginMessage: { type: "auth" } }, '*');
+      }}>
+        Login To Tempo
+      </button>
     </div>
-  );
+  )
+
 }

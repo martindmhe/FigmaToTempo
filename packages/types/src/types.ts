@@ -54,6 +54,10 @@ export type RequestSelectedDataMessage = Message & {
   data: string;
   url: string;
 };
+export type AuthMessage = Message & {
+  type: "auth_token";
+  token: string;
+};
 
 export type ErrorMessage = Message & {
   type: "error";
