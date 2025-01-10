@@ -30,6 +30,7 @@ type PluginUIProps = {
   gradients: LinearGradientConversion[];
   // temporary prop drilling
   openTempo: () => void;
+  addToNewProject: () => void;
 };
 
 const frameworks: Framework[] = ["HTML", "Tailwind", "Flutter", "SwiftUI"];
@@ -100,6 +101,7 @@ export const PluginUI = (props: PluginUIProps) => {
             settings={props.settings}
             onPreferenceChanged={props.onPreferenceChanged}
             openTempo={props.openTempo}
+            addToNewProject={props.addToNewProject}
           />
 
           {props.colors.length > 0 && (

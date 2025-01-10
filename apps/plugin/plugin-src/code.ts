@@ -220,12 +220,14 @@ const standardMode = async () => {
     }
 
     if (msg.type === "auth") {
-      const token = await figma.clientStorage.getAsync("auth_token");
-      if (token) {
-        console.log("cached token found");
-        figma.ui.postMessage({ type: "auth_token", token });
-        return;
-      }
+
+      // temporarily remove auth token caching for testing
+      // const token = await figma.clientStorage.getAsync("auth_token");
+      // if (token) {
+      //   console.log("cached token found");
+      //   figma.ui.postMessage({ type: "auth_token", token });
+      //   return;
+      // }
 
       const keysResponse = await fetch("http://localhost:3001/figma/auth/generateKeys");
       const { read_key, write_key } = await keysResponse.json();
@@ -251,16 +253,22 @@ const standardMode = async () => {
           const response = await fetch(`http://localhost:3001/figma/auth/${read_key}`);
           const data = await response.json();
           console.log("Auth check response:", data);
-          if (data[0].auth_token) {
-            const auth_token = data[0].auth_token;
+          if (data[0].supabase_token && data[0].github_token) {
+            
+            const { github_token, supabase_token } = data[0];
 
-            await figma.clientStorage.setAsync("auth_token", auth_token);
+            await figma.clientStorage.setAsync("auth_token", supabase_token);
 
-            console.log("Received token:", auth_token);
+            console.log("Received token:", supabase_token);
+
+            console.log("Received github token: ", github_token);
 
             figma.showUI(__html__, { width: 450, height: 700, themeColors: true })
 
-            figma.ui.postMessage({ type: "auth_token", token: auth_token });
+            figma.ui.postMessage({ type: "auth_token", tokens: { 
+              supabase_token,
+              github_token
+            } });
 
             // figma.closePlugin();
 

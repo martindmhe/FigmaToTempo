@@ -18,6 +18,7 @@ interface CodePanelProps {
   selectPreferenceOptions: SelectPreferenceOptions[];
   onPreferenceChanged: (key: string, value: boolean | string) => void;
   openTempo: () => void;
+  addToNewProject: () => void;
 }
 
 const CodePanel = (props: CodePanelProps) => {
@@ -92,7 +93,7 @@ const CodePanel = (props: CodePanelProps) => {
                   ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
                   : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
               }`}
-              onClick={props.openTempo}
+              onClick={props.addToNewProject}
               onMouseEnter={handleButtonHover}
               onMouseLeave={handleButtonLeave}
             > Open in new Tempo app</button>

@@ -16,7 +16,8 @@ import {
 } from "types";
 import { postUISettingsChangingMessage, triggerOpenTempo } from "./messaging";
 import callOpenAI from "../../../packages/backend/src/ai/openai";
-import { c } from "vite/dist/node/types.d-aGj9QkWt";
+import axios from "axios";
+
 
 interface AppState {
   code: string;
@@ -27,6 +28,11 @@ interface AppState {
   colors: SolidColorConversion[];
   gradients: LinearGradientConversion[];
   warnings: Warning[];
+}
+
+interface AuthTokens {
+  supabase_token: string;
+  github_token: string;
 }
 
 const emptyPreview = { size: { width: 0, height: 0 }, content: "" };
@@ -47,7 +53,7 @@ export default function App() {
     gradients: [],
     warnings: [],
   });
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [authTokens, setAuthTokens] = useState<AuthTokens | null>(null);
 
   const rootStyles = getComputedStyle(document.documentElement);
   const figmaColorBgValue = rootStyles
@@ -84,7 +90,9 @@ export default function App() {
           const { url } = selectedData;
 
           setState((prevState) => {
-            handleOpenTempo(url, prevState.code, context);
+            // handleOpenTempo(url, prevState.code, context);
+            addFigmaToNewProject(url, prevState.code, context);
+
             return prevState;
           });
 
@@ -93,11 +101,11 @@ export default function App() {
         case "auth_token":
           const authData = untypedMessage as AuthMessage;
           console.log("authenticated: ", authData)
-          if (authData.token) {
+          if (authData.tokens) {
             console.log("setting auth token")
-            setAuthToken(authData.token);
+            setAuthTokens(authData.tokens);
           } else {
-            setAuthToken(null);
+            setAuthTokens(null);
           }
 
           break;
@@ -132,7 +140,7 @@ export default function App() {
     return () => {
       window.onmessage = null;
     };
-  }, []);
+  }, [authTokens]);
 
   useEffect(() => {
     if (state.selectedFramework === null) {
@@ -155,8 +163,8 @@ export default function App() {
   }
 
   useEffect(() => {
-    console.log("authToken updated:", authToken);
-  }, [authToken]);
+    console.log("tokens updated:", authTokens);
+  }, [authTokens]);
 
   const handleFrameworkChange = (updatedFramework: Framework) => {
     setState((prevState) => ({
@@ -198,9 +206,30 @@ export default function App() {
 
   }
 
-  const handleCreateTempo = async (image_url: string, code: string, context: string = "") => {
+  const addFigmaToNewProject = async (image_url: string, code: string, context: string = "") => {
     console.log(image_url, code, context)
-      const response = await fetch('http://localhost:3001/figma/createNewProject', {
+
+    if (!authTokens) {
+      console.error("Authorization tokens are missing");
+      return;
+    }
+
+    const createProjectResponse = await axios.post('http://localhost:3001/figma/addToNew', { 
+      github_token: authTokens.github_token,
+    }, {
+      headers: {
+        Authorization: `Bearer ${authTokens.supabase_token}`,
+      },
+    }) as any;
+
+    const { project, canvas } = createProjectResponse.data;
+
+    console.log('figma_context:', context);
+    console.log('initial_code:', code);
+    console.log('image_url:', image_url);
+
+
+      const storeContextResponse = await fetch('http://localhost:3001/figma/storeContext', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,19 +239,20 @@ export default function App() {
           initial_code: code,
           user_id: "123456789",
           image_url: image_url
-        }),
+        }
+        ),
       })
-  
-      const jsonResponse = await response.json();
+
+      const jsonResponse = await storeContextResponse.json();  
       const id = jsonResponse[0].id;
   
       // temporarily hardcoding values
-      const base_url = `http://localhost:3050/canvases/e7299cf0-b520-4ac5-80a0-24f9f1c75eeb/editor`
+      const base_url = `http://localhost:3050/canvases/${canvas.id}/editor`
   
       window.open(`${base_url}?figmaContextId=${id}`, '_blank');
   }
 
-  if (authToken) {
+  if (authTokens) {
 
     return (
       <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
@@ -239,6 +269,7 @@ export default function App() {
           colors={state.colors}
           gradients={state.gradients}
           openTempo={triggerOpenTempo}
+          addToNewProject={triggerOpenTempo}
         />
       </div>
     );

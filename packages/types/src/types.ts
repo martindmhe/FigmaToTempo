@@ -56,7 +56,10 @@ export type RequestSelectedDataMessage = Message & {
 };
 export type AuthMessage = Message & {
   type: "auth_token";
-  token: string;
+  tokens: {
+    supabase_token: string;
+    github_token: string;
+  }
 };
 
 export type ErrorMessage = Message & {
