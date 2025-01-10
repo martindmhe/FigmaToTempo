@@ -191,6 +191,8 @@ const standardMode = async () => {
 
       // }
 
+      const selectedFrameName = selection[0].name;
+
       const frame = selection[0];
 
       const pngData = await frame.exportAsync({
@@ -211,7 +213,7 @@ const standardMode = async () => {
         const responseData = await response.json();
         figma.ui.postMessage({
           type: "selectedDataResponse",
-          data: "{}",
+          name: selectedFrameName,
           url: responseData.url,
         });
       } catch (error) {

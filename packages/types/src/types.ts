@@ -51,7 +51,7 @@ export type SettingsChangedMessage = Message & {
 };
 export type RequestSelectedDataMessage = Message & {
   type: "requestSelectedData";
-  data: string;
+  name: string;
   url: string;
 };
 export type AuthMessage = Message & {

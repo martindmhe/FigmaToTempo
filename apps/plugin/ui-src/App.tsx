@@ -18,7 +18,6 @@ import { postUISettingsChangingMessage, triggerOpenTempo } from "./messaging";
 import callOpenAI from "../../../packages/backend/src/ai/openai";
 import axios from "axios";
 
-
 interface AppState {
   code: string;
   selectedFramework: Framework;
@@ -86,12 +85,12 @@ export default function App() {
 
         case "selectedDataResponse":
           const selectedData = untypedMessage as RequestSelectedDataMessage;
-          const context = selectedData.data ?? "{}";
+          const name = selectedData.name;
           const { url } = selectedData;
 
           setState((prevState) => {
             // handleOpenTempo(url, prevState.code, context);
-            addFigmaToNewProject(url, prevState.code, context);
+            addFigmaToNewProject(url, prevState.code, name);
 
             return prevState;
           });
@@ -206,7 +205,7 @@ export default function App() {
 
   }
 
-  const addFigmaToNewProject = async (image_url: string, code: string, context: string = "") => {
+  const addFigmaToNewProject = async (image_url: string, code: string, name: string, context: string = "") => {
     console.log(image_url, code, context)
 
     if (!authTokens) {
@@ -216,6 +215,7 @@ export default function App() {
 
     const createProjectResponse = await axios.post('http://localhost:3001/figma/addToNew', { 
       github_token: authTokens.github_token,
+      component_name: name,
     }, {
       headers: {
         Authorization: `Bearer ${authTokens.supabase_token}`,
@@ -237,6 +237,7 @@ export default function App() {
         body: JSON.stringify({ 
           figma_context: context,
           initial_code: code,
+          component_name: name,
           user_id: "123456789",
           image_url: image_url
         }
