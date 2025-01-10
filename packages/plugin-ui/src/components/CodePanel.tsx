@@ -77,7 +77,7 @@ const CodePanel = (props: CodePanelProps) => {
       </div>
       {isEmpty === false && (
         <div className="flex items-center gap-4 w-full">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 relative">
             <button
                 className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
                   isPressed
@@ -91,7 +91,7 @@ const CodePanel = (props: CodePanelProps) => {
                 Open in existing Tempo app
               </button>
                 {isDropdownOpen && (
-                <div className="absolute mt-10 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
+                <div className="absolute mt-12 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
                   {props.userCanvases.map((canvas, idx) => (
                   <button
                     key={idx}
