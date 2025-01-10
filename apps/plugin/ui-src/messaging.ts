@@ -1,4 +1,4 @@
-import { Message, SettingWillChangeMessage, UIMessage } from "types";
+import { Message, SettingWillChangeMessage, SelectedDataRequestedMessage, UIMessage } from "types";
 
 if (!parent || !parent.postMessage) {
   throw new Error("parent.postMessage() is not defined");
@@ -24,10 +24,12 @@ export const postUISettingsChangingMessage = <T>(
   postUIMessage(message, options);
 };
 
-export const triggerOpenTempo = (options?: WindowPostMessageOptions) => {
+export const triggerOpenTempo = (operation: "new" | "existing", canvas_id?:string, options?: WindowPostMessageOptions) => {
   // fetch necessary selected data as context
-  const message: Message = {
+  const message: SelectedDataRequestedMessage = {
     type: "requestSelectedData",
+    operation,
+    canvas_id
   };
   parent.postMessage({pluginMessage: message}, "*");
 };

@@ -17,11 +17,13 @@ interface CodePanelProps {
   preferenceOptions: LocalCodegenPreferenceOptions[];
   selectPreferenceOptions: SelectPreferenceOptions[];
   onPreferenceChanged: (key: string, value: boolean | string) => void;
-  openTempo: () => void;
-  addToNewProject: () => void;
+  openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
+  userCanvases: string[];
 }
 
 const CodePanel = (props: CodePanelProps) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const [isPressed, setIsPressed] = useState(false);
   const [syntaxHovered, setSyntaxHovered] = useState(false);
   const {
@@ -81,19 +83,32 @@ const CodePanel = (props: CodePanelProps) => {
                   ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
                   : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
               }`}
-              onClick={props.openTempo}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               onMouseEnter={handleButtonHover}
               onMouseLeave={handleButtonLeave}
             >
               Open in existing Tempo app
             </button>
+            {isDropdownOpen && (
+              <div className="dropdown-menu">
+                {props.userCanvases.map((canvas, idx) => (
+                  <button
+                    key={idx}
+                    className="dropdown-item"
+                    onClick={() => props.openTempo("existing", canvas)}
+                  >
+                    {canvas}
+                  </button>
+                ))}
+              </div>
+            )}
             <button
               className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
                 isPressed
                   ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
                   : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
               }`}
-              onClick={props.addToNewProject}
+              onClick={() => props.openTempo("new")}
               onMouseEnter={handleButtonHover}
               onMouseLeave={handleButtonLeave}
             > Open in new Tempo app</button>

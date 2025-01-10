@@ -45,20 +45,28 @@ export type SettingWillChangeMessage<T> = Message & {
   key: string;
   value: T;
 };
+export type SelectedDataRequestedMessage = Message & {
+  type: "requestSelectedData";
+  operation: "new" | "existing";
+  canvas_id?: string;
+};
 export type SettingsChangedMessage = Message & {
   type: "pluginSettingsChanged";
   settings: PluginSettings;
 };
-export type RequestSelectedDataMessage = Message & {
+export type ReturnSelectedDataMessage = Message & {
   type: "requestSelectedData";
   name: string;
   url: string;
+  operation: "new" | "existing";
+  canvas_id?: string;
 };
 export type AuthMessage = Message & {
   type: "auth_token";
-  tokens: {
+  user_auth: {
     supabase_token: string;
     github_token: string;
+    user_id: string;
   }
 };
 

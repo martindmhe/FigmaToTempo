@@ -12,7 +12,7 @@ import { retrieveGenericSolidUIColors } from "backend/src/common/retrieveUI/retr
 import { flutterCodeGenTextStyles } from "backend/src/flutter/flutterMain";
 import { htmlCodeGenTextStyles } from "backend/src/html/htmlMain";
 import { swiftUICodeGenTextStyles } from "backend/src/swiftui/swiftuiMain";
-import { PluginSettings, SettingWillChangeMessage } from "types";
+import { PluginSettings, SettingWillChangeMessage, SelectedDataRequestedMessage } from "types";
 
 let userPluginSettings: PluginSettings;
 
@@ -100,6 +100,11 @@ const standardMode = async () => {
     }
     
     if (msg.type === "requestSelectedData") {
+      const { operation, canvas_id } = msg as SelectedDataRequestedMessage;
+
+      if (operation == "existing" && !canvas_id) {
+        figma.ui.postMessage({ type: "error", error: "No canvas ID provided for existing canvas" });
+      }
       // Collect selected node data
       const selection = figma.currentPage.selection;
 
@@ -215,6 +220,8 @@ const standardMode = async () => {
           type: "selectedDataResponse",
           name: selectedFrameName,
           url: responseData.url,
+          operation,
+          canvas_id
         });
       } catch (error) {
         console.error(error);
@@ -224,10 +231,10 @@ const standardMode = async () => {
     if (msg.type === "auth") {
 
       // temporarily remove auth token caching for testing
-      // const token = await figma.clientStorage.getAsync("auth_token");
-      // if (token) {
+      // const user_auth = await figma.clientStorage.getAsync("auth_token");
+      // if (user_auth) {
       //   console.log("cached token found");
-      //   figma.ui.postMessage({ type: "auth_token", token });
+      //   figma.ui.postMessage({ type: "auth_token", user_auth });
       //   return;
       // }
 
@@ -257,19 +264,20 @@ const standardMode = async () => {
           console.log("Auth check response:", data);
           if (data[0].supabase_token && data[0].github_token) {
             
-            const { github_token, supabase_token } = data[0];
+            const { github_token, supabase_token, user_id } = data[0];
 
-            await figma.clientStorage.setAsync("auth_token", supabase_token);
+            await figma.clientStorage.setAsync("auth_token", { github_token, supabase_token, user_id });
 
             console.log("Received token:", supabase_token);
-
             console.log("Received github token: ", github_token);
+            console.log("Received user", user_id);
 
             figma.showUI(__html__, { width: 450, height: 700, themeColors: true })
 
-            figma.ui.postMessage({ type: "auth_token", tokens: { 
+            figma.ui.postMessage({ type: "auth_token", user_auth: { 
               supabase_token,
-              github_token
+              github_token,
+              user_id
             } });
 
             // figma.closePlugin();

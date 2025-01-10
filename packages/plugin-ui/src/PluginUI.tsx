@@ -29,8 +29,8 @@ type PluginUIProps = {
   colors: SolidColorConversion[];
   gradients: LinearGradientConversion[];
   // temporary prop drilling
-  openTempo: () => void;
-  addToNewProject: () => void;
+  openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
+  userCanvases: string[];
 };
 
 const frameworks: Framework[] = ["HTML", "Tailwind", "Flutter", "SwiftUI"];
@@ -101,7 +101,7 @@ export const PluginUI = (props: PluginUIProps) => {
             settings={props.settings}
             onPreferenceChanged={props.onPreferenceChanged}
             openTempo={props.openTempo}
-            addToNewProject={props.addToNewProject}
+            userCanvases={props.userCanvases}
           />
 
           {props.colors.length > 0 && (
