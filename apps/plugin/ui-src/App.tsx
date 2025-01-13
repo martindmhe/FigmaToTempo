@@ -88,6 +88,13 @@ export default function App() {
 
   const [canvases, setCanvases] = useState<any[]>([]);
 
+  // temp wrapper function to avoid prop drilling supabase JWT
+  const tempTriggerOpenTempoWrapper = (supabaseJWT: string) => {
+    return (operation: "new" | "existing", canvas_id?: string) => {
+      triggerOpenTempo(operation, supabaseJWT, canvas_id);
+    }
+  }
+  
   useEffect(() => {
     const supabaseJWT = authTokens?.supabase_token;
 
@@ -176,6 +183,7 @@ export default function App() {
           break;
 
         case "selectedDataResponse":
+          console.log("selectedDataResponse", untypedMessage);
           const selectedData = untypedMessage as ReturnSelectedDataMessage;
           const name = selectedData.name;
           const operation = selectedData.operation;
@@ -278,7 +286,7 @@ export default function App() {
   };
   // console.log("state.code", state.code.slice(0, 25));
 
-  const addFigmaToExistingProject = async (image_url: string, code: string, canvas_id: string, figma_data: ParentNode) => {
+  const addFigmaToExistingProject = async (image_url: string, code: string, canvas_id: string, figma_data: string) => {
 
 
       if (!authTokens) {
@@ -294,7 +302,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          figma_context: JSON.stringify(figma_data),
+          figma_context: figma_data,
           initial_code: code,
           user_id: authTokens?.user_id,
           image_url: image_url
@@ -312,7 +320,7 @@ export default function App() {
 
   }
 
-  const addFigmaToNewProject = async (image_url: string, code: string, name: string, figma_data: ParentNode) => {
+  const addFigmaToNewProject = async (image_url: string, code: string, name: string, figma_data: string) => {
 
     if (!authTokens) {
       console.error("Authorization tokens are missing");
@@ -342,7 +350,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          figma_context: JSON.stringify(figma_data),
+          figma_context: figma_data,
           initial_code: code,
           component_name: name,
           image_url: image_url
@@ -374,7 +382,7 @@ export default function App() {
           }
           colors={state.colors}
           gradients={state.gradients}
-          openTempo={triggerOpenTempo}
+          openTempo={tempTriggerOpenTempoWrapper(authTokens.supabase_token)}
           userCanvases={canvases.map((canvas) => ({canvas_id: canvas.id, project_name: canvas.project_name}))}
         />
       </div>

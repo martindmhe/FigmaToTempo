@@ -48,6 +48,7 @@ export type SettingWillChangeMessage<T> = Message & {
 export type SelectedDataRequestedMessage = Message & {
   type: "requestSelectedData";
   operation: "new" | "existing";
+  supabaseJWT: string;
   canvas_id?: string;
 };
 export type SettingsChangedMessage = Message & {
@@ -58,7 +59,7 @@ export type ReturnSelectedDataMessage = Message & {
   type: "requestSelectedData";
   name: string;
   url: string;
-  figma_data: ParentNode;
+  figma_data: string;
   operation: "new" | "existing";
   canvas_id?: string;
 };

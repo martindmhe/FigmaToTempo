@@ -24,11 +24,12 @@ export const postUISettingsChangingMessage = <T>(
   postUIMessage(message, options);
 };
 
-export const triggerOpenTempo = (operation: "new" | "existing", canvas_id?:string, options?: WindowPostMessageOptions) => {
+export const triggerOpenTempo = (operation: "new" | "existing", supabaseJWT: string, canvas_id?:string, options?: WindowPostMessageOptions) => {
   // fetch necessary selected data as context
   const message: SelectedDataRequestedMessage = {
     type: "requestSelectedData",
     operation,
+    supabaseJWT,
     canvas_id
   };
   parent.postMessage({pluginMessage: message}, "*");

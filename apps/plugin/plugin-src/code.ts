@@ -100,7 +100,7 @@ const standardMode = async () => {
     }
     
     if (msg.type === "requestSelectedData") {
-      const { operation, canvas_id } = msg as SelectedDataRequestedMessage;
+      const { operation, canvas_id, supabaseJWT } = msg as SelectedDataRequestedMessage;
 
       if (operation == "existing" && !canvas_id) {
         figma.ui.postMessage({ type: "error", error: "No canvas ID provided for existing canvas" });
@@ -260,19 +260,23 @@ const standardMode = async () => {
       const base64PNG = figma.base64Encode(pngData);
 
       try {
-        const response = await fetch("http://localhost:3001/figma/uploadPNG", {
+        const response = await fetch("http://localhost:3001/imageUpload", {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${supabaseJWT}`,
             "Content-Type": "application/json"
+
           },
-          body: JSON.stringify({ pngData: base64PNG })
+          body: JSON.stringify({ file: base64PNG, fileName: `${selectedFrameName.replace(' ', '_').toLowerCase()}.png` })
         });
         const responseData = await response.json();
+        console.log("Image upload response:", responseData);
+        
         figma.ui.postMessage({
           type: "selectedDataResponse",
           name: selectedFrameName,
           url: responseData.url,
-          figma_data: parseSelectedData(selection),
+          figma_data: JSON.stringify(parseSelectedData(selection)),
           operation,
           canvas_id
         });
@@ -284,12 +288,12 @@ const standardMode = async () => {
     if (msg.type === "auth") {
 
       // temporarily remove auth token caching for testing
-      // const user_auth = await figma.clientStorage.getAsync("auth_token");
-      // if (user_auth) {
-      //   console.log("cached token found");
-      //   figma.ui.postMessage({ type: "auth_token", user_auth });
-      //   return;
-      // }
+      const user_auth = await figma.clientStorage.getAsync("auth_token");
+      if (user_auth) {
+        console.log("cached token found");
+        figma.ui.postMessage({ type: "auth_token", user_auth });
+        return;
+      }
 
       const keysResponse = await fetch("http://localhost:3001/figma/auth/generateKeys");
       const { read_key, write_key } = await keysResponse.json();
