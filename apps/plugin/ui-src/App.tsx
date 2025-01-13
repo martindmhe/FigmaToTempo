@@ -329,7 +329,7 @@ export default function App() {
     console.log('image_url:', image_url);
 
 
-      const storeContextResponse = await fetch('http://localhost:3001/figma/storeContext', {
+      const storeContextResponse = await fetch('http://localhost:3001/figma/context', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -338,7 +338,6 @@ export default function App() {
           figma_context: JSON.stringify(figma_data),
           initial_code: code,
           component_name: name,
-          user_id: "123456789",
           image_url: image_url
         }),
       })

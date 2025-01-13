@@ -107,7 +107,7 @@ const standardMode = async () => {
       }
       // Collect selected node data
       const selection = figma.currentPage.selection;
-
+      
       const parseSelectedData = (nodeList: any) => {
         return nodeList.map((node: any) => {
 
@@ -315,9 +315,9 @@ const standardMode = async () => {
           const response = await fetch(`http://localhost:3001/figma/auth/${read_key}`);
           const data = await response.json();
           console.log("Auth check response:", data);
-          if (data[0].supabase_token && data[0].github_token) {
+          if (data.supabase_token && data.github_token) {
             
-            const { github_token, supabase_token, user_id } = data[0];
+            const { github_token, supabase_token, user_id } = data;
 
             await figma.clientStorage.setAsync("auth_token", { github_token, supabase_token, user_id });
 
