@@ -280,11 +280,17 @@ export default function App() {
 
   const addFigmaToExistingProject = async (image_url: string, code: string, canvas_id: string, figma_data: ParentNode) => {
 
+
+      if (!authTokens) {
+        console.error("Authorization tokens are missing");
+        return;
+      }
       console.log(image_url, code, figma_data)
 
-      const response = await fetch('http://localhost:3001/figma/storeContext', {
+      const response = await fetch('http://localhost:3001/figma/context', {
         method: 'POST',
         headers: {
+          Authorization: `Bearer ${authTokens.supabase_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
@@ -332,6 +338,7 @@ export default function App() {
       const storeContextResponse = await fetch('http://localhost:3001/figma/context', {
         method: 'POST',
         headers: {
+          Authorization: `Bearer ${authTokens.supabase_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
