@@ -58,6 +58,7 @@ export type ReturnSelectedDataMessage = Message & {
   type: "requestSelectedData";
   name: string;
   url: string;
+  figma_data: ParentNode;
   operation: "new" | "existing";
   canvas_id?: string;
 };

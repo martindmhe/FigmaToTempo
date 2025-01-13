@@ -108,6 +108,58 @@ const standardMode = async () => {
       // Collect selected node data
       const selection = figma.currentPage.selection;
 
+      const parseSelectedData = (nodeList: any) => {
+        return nodeList.map((node: any) => {
+
+          const data: any = {
+            id: node.id,
+            name: node.name,
+            type: node.type,
+            visible: node.visible,
+            locked: node.locked,
+            parent: node.parent?.id || null,
+            x: node.x,
+            y: node.y,
+          };
+    
+          // Additional fields based on node type
+          if (node.type === "TEXT") {
+            const textNode = node as TextNode;
+            Object.assign(data, {
+              characters: textNode.characters,
+              fontSize: textNode.fontSize,
+              fontName: textNode.fontName,
+              textAlignHorizontal: textNode.textAlignHorizontal,
+              textAlignVertical: textNode.textAlignVertical,
+              lineHeight: textNode.lineHeight,
+              letterSpacing: textNode.letterSpacing,
+              fills: textNode.fills,
+            });
+          } else if (node.type === "FRAME") {
+            const frameNode = node as FrameNode;
+            Object.assign(data, {
+              children: frameNode.children.map((child) => child.id),
+              layoutMode: frameNode.layoutMode,
+              paddingLeft: frameNode.paddingLeft,
+              paddingRight: frameNode.paddingRight,
+              paddingTop: frameNode.paddingTop,
+              paddingBottom: frameNode.paddingBottom,
+              itemSpacing: frameNode.itemSpacing,
+              fills: frameNode.fills,
+              strokes: frameNode.strokes,
+              cornerRadius: frameNode.cornerRadius,
+            });
+          } else if (node.type === "GROUP") {
+            const groupNode = node as GroupNode;
+            Object.assign(data, {
+              children: parseSelectedData(groupNode.children),
+            });
+          }
+          return data;
+        })
+
+      }
+
       // const parseSelectedData = (nodeList: any) => {
       //   return nodeList.map((node: any) => {
 
@@ -220,6 +272,7 @@ const standardMode = async () => {
           type: "selectedDataResponse",
           name: selectedFrameName,
           url: responseData.url,
+          figma_data: parseSelectedData(selection),
           operation,
           canvas_id
         });

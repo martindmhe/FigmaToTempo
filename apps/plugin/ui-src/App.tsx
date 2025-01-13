@@ -20,6 +20,8 @@ import callOpenAI from "../../../packages/backend/src/ai/openai";
 import axios from "axios";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 
+import { ParentNode } from "types";
+
 
 interface AppState {
   code: string;
@@ -43,6 +45,29 @@ const emptyPreview = { size: { width: 0, height: 0 }, content: "" };
 const returnEditedCode = async (code: string) => {
   const response = await callOpenAI(`${code}, This code was generated from Figma. Please refactor it to be production-ready, ensuring best practices are followed, and return only the updated code in plain text format. Do not include explanations, comments, or markdown.`)
   return response.replace(/```[a-z]*\n?|\n?```/g, '')
+}
+
+const processFigmaData = (figmaData: ParentNode) => {
+  const processNode = (node: any, indent: string = ''): string => {
+    let result = `${indent}<${node.type}`;
+    
+    // Add attributes
+    if (node.id) result += ` id="${node.id}"`;
+    if (node.name) result += ` name="${node.name}"`;
+    
+    // Handle children
+    if (node.children && node.children.length > 0) {
+      result += '>\n';
+      result += node.children.map(child => processNode(child, indent + '  ')).join('\n');
+      result += `\n${indent}</${node.type}>`;
+    } else {
+      result += ' />';
+    }
+    
+    return result;
+  };
+
+  return processNode(figmaData);
 }
 
 export default function App() {
@@ -162,11 +187,11 @@ export default function App() {
                 console.error("canvas_id is missing from selectedData");
                 return prevState;
               }
-              addFigmaToExistingProject(url, prevState.code, selectedData.canvas_id);
+              addFigmaToExistingProject(url, prevState.code, selectedData.canvas_id, selectedData.figma_data);
               return prevState;
             }
 
-            addFigmaToNewProject(url, prevState.code, name);
+            addFigmaToNewProject(url, prevState.code, name, selectedData.figma_data);
 
             return prevState;
           });
@@ -253,9 +278,9 @@ export default function App() {
   };
   // console.log("state.code", state.code.slice(0, 25));
 
-  const addFigmaToExistingProject = async (image_url: string, code: string, canvas_id: string, context: string = "") => {
+  const addFigmaToExistingProject = async (image_url: string, code: string, canvas_id: string, figma_data: ParentNode) => {
 
-      console.log(image_url, code, context)
+      console.log(image_url, code, figma_data)
 
       const response = await fetch('http://localhost:3001/figma/storeContext', {
         method: 'POST',
@@ -263,7 +288,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          figma_context: context,
+          figma_context: JSON.stringify(figma_data),
           initial_code: code,
           user_id: authTokens?.user_id,
           image_url: image_url
@@ -281,8 +306,7 @@ export default function App() {
 
   }
 
-  const addFigmaToNewProject = async (image_url: string, code: string, name: string, context: string = "") => {
-    console.log(image_url, code, context)
+  const addFigmaToNewProject = async (image_url: string, code: string, name: string, figma_data: ParentNode) => {
 
     if (!authTokens) {
       console.error("Authorization tokens are missing");
@@ -300,7 +324,7 @@ export default function App() {
 
     const { project, canvas } = createProjectResponse.data;
 
-    console.log('figma_context:', context);
+    console.log('figma_context:', figma_data);
     console.log('initial_code:', code);
     console.log('image_url:', image_url);
 
@@ -311,7 +335,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          figma_context: context,
+          figma_context: JSON.stringify(figma_data),
           initial_code: code,
           component_name: name,
           user_id: "123456789",
