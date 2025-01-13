@@ -1,5 +1,5 @@
 {
-  "name": "Figma to Code [HTML, Tailwind, Flutter, SwiftUI]",
+  "name": "Figma to Tempo",
   "id": "842128343887142055",
   "api": "1.0.0",
   "main": "apps/plugin/dist/code.js",
@@ -8,7 +8,8 @@
   "capabilities": ["inspect", "codegen", "vscode"],
   "permissions": [],
   "networkAccess": {
-    "allowedDomains": ["https://api.openai.com"]
+    "allowedDomains": ["https://api.openai.com", "https://tempolabs.us.auth0.com/", "https://bzcxxroyylqcbnrgyxhx.supabase.co"],
+    "devAllowedDomains": ["http://localhost:3001"]
   },
   "codegenLanguages": [
     { "label": "HTML", "value": "html" },

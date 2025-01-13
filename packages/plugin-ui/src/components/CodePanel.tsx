@@ -3,6 +3,7 @@ import {
   LocalCodegenPreferenceOptions,
   PluginSettings,
   SelectPreferenceOptions,
+  Canvas
 } from "types";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -17,10 +18,13 @@ interface CodePanelProps {
   preferenceOptions: LocalCodegenPreferenceOptions[];
   selectPreferenceOptions: SelectPreferenceOptions[];
   onPreferenceChanged: (key: string, value: boolean | string) => void;
-  editWithAI: () => void;
+  openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
+  userCanvases: Canvas[];
 }
 
 const CodePanel = (props: CodePanelProps) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const [isPressed, setIsPressed] = useState(false);
   const [syntaxHovered, setSyntaxHovered] = useState(false);
   const {
@@ -62,18 +66,6 @@ const CodePanel = (props: CodePanelProps) => {
                   ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
                   : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
               }`}
-              onClick={props.editWithAI}
-              onMouseEnter={handleButtonHover}
-              onMouseLeave={handleButtonLeave}
-            >
-              Revise with AI
-            </button>
-            <button
-              className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
-                isPressed
-                  ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
-                  : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
-              }`}
               onClick={handleButtonClick}
               onMouseEnter={handleButtonHover}
               onMouseLeave={handleButtonLeave}
@@ -83,6 +75,47 @@ const CodePanel = (props: CodePanelProps) => {
           </>
         )}
       </div>
+      {isEmpty === false && (
+        <div className="flex items-center gap-4 w-full">
+          <div className="flex flex-col gap-2 relative">
+            <button
+                className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
+                  isPressed
+                    ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
+                    : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
+                }`}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onMouseEnter={handleButtonHover}
+                onMouseLeave={handleButtonLeave}
+              >
+                Open in existing Tempo app
+              </button>
+                {isDropdownOpen && (
+                <div className="absolute mt-12 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
+                  {props.userCanvases.map((canvas, idx) => (
+                  <button
+                    key={idx}
+                    className="w-full px-4 py-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200"
+                    onClick={() => props.openTempo("existing", canvas.canvas_id)}
+                  >
+                    {canvas.project_name}
+                  </button>
+                  ))}
+                </div>
+                )}
+          </div>
+            <button
+              className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
+                isPressed
+                  ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
+                  : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
+              }`}
+              onClick={() => props.openTempo("new")}
+              onMouseEnter={handleButtonHover}
+              onMouseLeave={handleButtonLeave}
+            > Open in new Tempo app</button>
+        </div>
+      )}
 
       {isEmpty === false && (
         <div className="flex gap-2 justify-center flex-col p-2 dark:bg-black dark:bg-opacity-25 bg-neutral-100 ring-1 ring-neutral-200 dark:ring-neutral-700 rounded-lg text-sm">

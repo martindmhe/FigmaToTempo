@@ -18,6 +18,8 @@ import {
   selectPreferenceOptions,
 } from "./codegenPreferenceOptions";
 
+import { Canvas } from "types";
+
 type PluginUIProps = {
   code: string;
   htmlPreview: HTMLPreview;
@@ -29,7 +31,8 @@ type PluginUIProps = {
   colors: SolidColorConversion[];
   gradients: LinearGradientConversion[];
   // temporary prop drilling
-  editWithAI: () => void;
+  openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
+  userCanvases: Canvas[];
 };
 
 const frameworks: Framework[] = ["HTML", "Tailwind", "Flutter", "SwiftUI"];
@@ -99,7 +102,8 @@ export const PluginUI = (props: PluginUIProps) => {
             selectPreferenceOptions={selectPreferenceOptions}
             settings={props.settings}
             onPreferenceChanged={props.onPreferenceChanged}
-            editWithAI={props.editWithAI}
+            openTempo={props.openTempo}
+            userCanvases={props.userCanvases}
           />
 
           {props.colors.length > 0 && (

@@ -12,7 +12,7 @@ import { retrieveGenericSolidUIColors } from "backend/src/common/retrieveUI/retr
 import { flutterCodeGenTextStyles } from "backend/src/flutter/flutterMain";
 import { htmlCodeGenTextStyles } from "backend/src/html/htmlMain";
 import { swiftUICodeGenTextStyles } from "backend/src/swiftui/swiftuiMain";
-import { PluginSettings, SettingWillChangeMessage } from "types";
+import { PluginSettings, SettingWillChangeMessage, SelectedDataRequestedMessage } from "types";
 
 let userPluginSettings: PluginSettings;
 
@@ -89,7 +89,7 @@ const standardMode = async () => {
     safeRun(userPluginSettings);
   });
 
-  figma.ui.onmessage = (msg) => {
+  figma.ui.onmessage = async (msg) => {
     console.log("[node] figma.ui.onmessage", msg);
 
     if (msg.type === "pluginSettingWillChange") {
@@ -98,6 +98,256 @@ const standardMode = async () => {
       figma.clientStorage.setAsync("userPluginSettings", userPluginSettings);
       safeRun(userPluginSettings);
     }
+    
+    if (msg.type === "requestSelectedData") {
+      const { operation, canvas_id } = msg as SelectedDataRequestedMessage;
+
+      if (operation == "existing" && !canvas_id) {
+        figma.ui.postMessage({ type: "error", error: "No canvas ID provided for existing canvas" });
+      }
+      // Collect selected node data
+      const selection = figma.currentPage.selection;
+
+      const parseSelectedData = (nodeList: any) => {
+        return nodeList.map((node: any) => {
+
+          const data: any = {
+            id: node.id,
+            name: node.name,
+            type: node.type,
+            visible: node.visible,
+            locked: node.locked,
+            parent: node.parent?.id || null,
+            x: node.x,
+            y: node.y,
+          };
+    
+          // Additional fields based on node type
+          if (node.type === "TEXT") {
+            const textNode = node as TextNode;
+            Object.assign(data, {
+              characters: textNode.characters,
+              fontSize: textNode.fontSize,
+              fontName: textNode.fontName,
+              textAlignHorizontal: textNode.textAlignHorizontal,
+              textAlignVertical: textNode.textAlignVertical,
+              lineHeight: textNode.lineHeight,
+              letterSpacing: textNode.letterSpacing,
+              fills: textNode.fills,
+            });
+          } else if (node.type === "FRAME") {
+            const frameNode = node as FrameNode;
+            Object.assign(data, {
+              children: frameNode.children.map((child) => child.id),
+              layoutMode: frameNode.layoutMode,
+              paddingLeft: frameNode.paddingLeft,
+              paddingRight: frameNode.paddingRight,
+              paddingTop: frameNode.paddingTop,
+              paddingBottom: frameNode.paddingBottom,
+              itemSpacing: frameNode.itemSpacing,
+              fills: frameNode.fills,
+              strokes: frameNode.strokes,
+              cornerRadius: frameNode.cornerRadius,
+            });
+          } else if (node.type === "GROUP") {
+            const groupNode = node as GroupNode;
+            Object.assign(data, {
+              children: parseSelectedData(groupNode.children),
+            });
+          }
+          return data;
+        })
+
+      }
+
+      // const parseSelectedData = (nodeList: any) => {
+      //   return nodeList.map((node: any) => {
+
+      //     const data: any = {
+      //       id: node.id,
+      //       name: node.name,
+      //       type: node.type,
+      //       visible: node.visible,
+      //       locked: node.locked,
+      //       parent: node.parent?.id || null,
+      //       x: node.x,
+      //       y: node.y,
+      //     };
+    
+      //     // Additional fields based on node type
+      //     if (node.type === "TEXT") {
+      //       const textNode = node as TextNode;
+      //       Object.assign(data, {
+      //         characters: textNode.characters,
+      //         fontSize: textNode.fontSize,
+      //         fontName: textNode.fontName,
+      //         textAlignHorizontal: textNode.textAlignHorizontal,
+      //         textAlignVertical: textNode.textAlignVertical,
+      //         lineHeight: textNode.lineHeight,
+      //         letterSpacing: textNode.letterSpacing,
+      //         fills: textNode.fills,
+      //       });
+      //     } else if (node.type === "FRAME") {
+      //       const frameNode = node as FrameNode;
+      //       Object.assign(data, {
+      //         children: frameNode.children.map((child) => child.id),
+      //         layoutMode: frameNode.layoutMode,
+      //         paddingLeft: frameNode.paddingLeft,
+      //         paddingRight: frameNode.paddingRight,
+      //         paddingTop: frameNode.paddingTop,
+      //         paddingBottom: frameNode.paddingBottom,
+      //         itemSpacing: frameNode.itemSpacing,
+      //         fills: frameNode.fills,
+      //         strokes: frameNode.strokes,
+      //         cornerRadius: frameNode.cornerRadius,
+      //       });
+      //     } else if (node.type === "RECTANGLE") {
+      //       const rectNode = node as RectangleNode;
+      //       Object.assign(data, {
+      //         width: rectNode.width,
+      //         height: rectNode.height,
+      //         cornerRadius: rectNode.cornerRadius,
+      //         fills: rectNode.fills,
+      //         strokes: rectNode.strokes,
+      //         strokeWeight: rectNode.strokeWeight,
+      //       });
+      //     } else if (node.type === "ELLIPSE") {
+      //       const ellipseNode = node as EllipseNode;
+      //       Object.assign(data, {
+      //         width: ellipseNode.width,
+      //         height: ellipseNode.height,
+      //         fills: ellipseNode.fills,
+      //         strokes: ellipseNode.strokes,
+      //         strokeWeight: ellipseNode.strokeWeight,
+      //         arcData: ellipseNode.arcData,
+      //       });
+      //     } else if (node.type === "GROUP") {
+      //       const groupNode = node as GroupNode;
+      //       Object.assign(data, {
+      //         children: parseSelectedData(groupNode.children),
+      //       });
+      //     } else if (node.type === "LINE") {
+      //       const lineNode = node as LineNode;
+      //       Object.assign(data, {
+      //         width: lineNode.width,
+      //         strokes: lineNode.strokes,
+      //         strokeWeight: lineNode.strokeWeight,
+      //       });
+      //     } else if (node.type === "VECTOR") {
+      //       const vectorNode = node as VectorNode;
+      //       Object.assign(data, {
+      //         vectorPaths: vectorNode.vectorPaths,
+      //         fills: vectorNode.fills,
+      //         strokes: vectorNode.strokes,
+      //         strokeWeight: vectorNode.strokeWeight,
+      //       });
+      //     }
+    
+      //     return data;
+      //   })
+
+      // }
+
+      const selectedFrameName = selection[0].name;
+
+      const frame = selection[0];
+
+      const pngData = await frame.exportAsync({
+        format: "PNG",
+        constraint: { type: "SCALE", value: 2 }
+      });
+
+      const base64PNG = figma.base64Encode(pngData);
+
+      try {
+        const response = await fetch("http://localhost:3001/figma/uploadPNG", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ pngData: base64PNG })
+        });
+        const responseData = await response.json();
+        figma.ui.postMessage({
+          type: "selectedDataResponse",
+          name: selectedFrameName,
+          url: responseData.url,
+          figma_data: parseSelectedData(selection),
+          operation,
+          canvas_id
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    if (msg.type === "auth") {
+
+      // temporarily remove auth token caching for testing
+      // const user_auth = await figma.clientStorage.getAsync("auth_token");
+      // if (user_auth) {
+      //   console.log("cached token found");
+      //   figma.ui.postMessage({ type: "auth_token", user_auth });
+      //   return;
+      // }
+
+      const keysResponse = await fetch("http://localhost:3001/figma/auth/generateKeys");
+      const { read_key, write_key } = await keysResponse.json();
+      console.log("Keys:", read_key, write_key);
+      figma.showUI(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>OAuth Login</title>
+          </head>
+          <body>
+            <h1>Loading...</h1>
+            <script>
+              console.log("test")
+              window.location.href = "http://localhost:3001/figma/auth/login?write_key=${write_key}";
+            </script>
+          </body>
+        </html>
+    `, { width: 400, height: 400 });
+
+      const checkAuth = async () => {
+        try {
+          const response = await fetch(`http://localhost:3001/figma/auth/${read_key}`);
+          const data = await response.json();
+          console.log("Auth check response:", data);
+          if (data[0].supabase_token && data[0].github_token) {
+            
+            const { github_token, supabase_token, user_id } = data[0];
+
+            await figma.clientStorage.setAsync("auth_token", { github_token, supabase_token, user_id });
+
+            console.log("Received token:", supabase_token);
+            console.log("Received github token: ", github_token);
+            console.log("Received user", user_id);
+
+            figma.showUI(__html__, { width: 450, height: 700, themeColors: true })
+
+            figma.ui.postMessage({ type: "auth_token", user_auth: { 
+              supabase_token,
+              github_token,
+              user_id
+            } });
+
+            // figma.closePlugin();
+
+            return;
+          }
+        } catch (error) {
+          console.error("Auth check failed:", error);
+        }
+        
+        setTimeout(checkAuth, 1000);
+      };
+
+      checkAuth();
+
+    }
+
   };
 };
 

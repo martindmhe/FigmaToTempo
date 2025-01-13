@@ -45,10 +45,32 @@ export type SettingWillChangeMessage<T> = Message & {
   key: string;
   value: T;
 };
+export type SelectedDataRequestedMessage = Message & {
+  type: "requestSelectedData";
+  operation: "new" | "existing";
+  canvas_id?: string;
+};
 export type SettingsChangedMessage = Message & {
   type: "pluginSettingsChanged";
   settings: PluginSettings;
 };
+export type ReturnSelectedDataMessage = Message & {
+  type: "requestSelectedData";
+  name: string;
+  url: string;
+  figma_data: ParentNode;
+  operation: "new" | "existing";
+  canvas_id?: string;
+};
+export type AuthMessage = Message & {
+  type: "auth_token";
+  user_auth: {
+    supabase_token: string;
+    github_token: string;
+    user_id: string;
+  }
+};
+
 export type ErrorMessage = Message & {
   type: "error";
   error: string;
@@ -192,4 +214,9 @@ export interface LocalCodegenPreferenceOptions extends PreferenceOptions {
   description: string;
   value?: boolean;
   isDefault?: boolean;
+}
+
+export interface Canvas {
+  canvas_id: string;
+  project_name: string;
 }
