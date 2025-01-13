@@ -60,6 +60,7 @@ export type ReturnSelectedDataMessage = Message & {
   name: string;
   url: string;
   figma_data: string;
+  frame_images: string;
   operation: "new" | "existing";
   canvas_id?: string;
 };

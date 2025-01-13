@@ -75,6 +75,28 @@ const safeRun = (settings: PluginSettings) => {
   }
 };
 
+
+const findNodesWithImageFills = (root: SceneNode): SceneNode[] => {
+  const result: SceneNode[] = [];
+
+  function traverse(node: SceneNode) {
+    if ('fills' in node && Array.isArray(node.fills)) {
+      const hasImageFill = node.fills.some((f) => f.type === 'IMAGE');
+      if (hasImageFill) {
+        result.push(node);
+      }
+    }
+    if ('children' in node) {
+      for (const child of node.children) {
+        traverse(child as SceneNode);
+      }
+    }
+  }
+
+  traverse(root);
+  return result;
+}
+
 const standardMode = async () => {
   figma.showUI(__html__, { width: 450, height: 700, themeColors: true });
   await initSettings();
@@ -107,6 +129,49 @@ const standardMode = async () => {
       }
       // Collect selected node data
       const selection = figma.currentPage.selection;
+
+      const frame = selection[0];
+
+      const nodesWithImages = findNodesWithImageFills(frame);
+
+      let uploadResults: Array<{ nodeId: string; url: string }> = [];
+      for (const node of nodesWithImages) {
+        const imageFills = (node.fills as Paint[]).filter(
+          (fill) => fill.type === 'IMAGE'
+        ) as ImagePaint[];
+    
+        for (const fill of imageFills) {
+          if (!fill.imageHash) continue;
+    
+          const image = figma.getImageByHash(fill.imageHash);
+          if (!image) continue;
+
+          const bytes = await image.getBytesAsync();
+          const base64 = figma.base64Encode(bytes);
+      // Check file size (base64 string length * 0.75 gives approximate size in bytes)
+      const fileSizeInMB = (base64.length * 0.75) / (1024 * 1024);
+      console.log(`${node.id} File size: ${fileSizeInMB.toFixed(2)}MB`);
+      if (fileSizeInMB > 5) {
+        console.log(`Skipping ${node.id}: file size ${fileSizeInMB.toFixed(2)}MB exceeds 5MB limit`);
+        continue;
+      }
+
+      const fileName = `node-${node.id}-${Date.now()}.png`;
+      const response = await fetch("http://localhost:3001/imageUpload", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseJWT}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ file: base64, fileName: `${fileName}` })
+      });
+          const { url: publicUrl } = await response.json();
+    
+          uploadResults.push({ nodeId: node.id, url: publicUrl });
+        }
+      }
+
+      console.log("Image upload results:", uploadResults);
       
       const parseSelectedData = (nodeList: any) => {
         return nodeList.map((node: any) => {
@@ -138,6 +203,7 @@ const standardMode = async () => {
           } else if (node.type === "FRAME") {
             const frameNode = node as FrameNode;
             Object.assign(data, {
+              id: node.id,
               children: frameNode.children.map((child) => child.id),
               layoutMode: frameNode.layoutMode,
               paddingLeft: frameNode.paddingLeft,
@@ -152,109 +218,20 @@ const standardMode = async () => {
           } else if (node.type === "GROUP") {
             const groupNode = node as GroupNode;
             Object.assign(data, {
+              id: node.id,
               children: parseSelectedData(groupNode.children),
             });
-          }
+          } 
           return data;
         })
 
       }
 
-      // const parseSelectedData = (nodeList: any) => {
-      //   return nodeList.map((node: any) => {
-
-      //     const data: any = {
-      //       id: node.id,
-      //       name: node.name,
-      //       type: node.type,
-      //       visible: node.visible,
-      //       locked: node.locked,
-      //       parent: node.parent?.id || null,
-      //       x: node.x,
-      //       y: node.y,
-      //     };
-    
-      //     // Additional fields based on node type
-      //     if (node.type === "TEXT") {
-      //       const textNode = node as TextNode;
-      //       Object.assign(data, {
-      //         characters: textNode.characters,
-      //         fontSize: textNode.fontSize,
-      //         fontName: textNode.fontName,
-      //         textAlignHorizontal: textNode.textAlignHorizontal,
-      //         textAlignVertical: textNode.textAlignVertical,
-      //         lineHeight: textNode.lineHeight,
-      //         letterSpacing: textNode.letterSpacing,
-      //         fills: textNode.fills,
-      //       });
-      //     } else if (node.type === "FRAME") {
-      //       const frameNode = node as FrameNode;
-      //       Object.assign(data, {
-      //         children: frameNode.children.map((child) => child.id),
-      //         layoutMode: frameNode.layoutMode,
-      //         paddingLeft: frameNode.paddingLeft,
-      //         paddingRight: frameNode.paddingRight,
-      //         paddingTop: frameNode.paddingTop,
-      //         paddingBottom: frameNode.paddingBottom,
-      //         itemSpacing: frameNode.itemSpacing,
-      //         fills: frameNode.fills,
-      //         strokes: frameNode.strokes,
-      //         cornerRadius: frameNode.cornerRadius,
-      //       });
-      //     } else if (node.type === "RECTANGLE") {
-      //       const rectNode = node as RectangleNode;
-      //       Object.assign(data, {
-      //         width: rectNode.width,
-      //         height: rectNode.height,
-      //         cornerRadius: rectNode.cornerRadius,
-      //         fills: rectNode.fills,
-      //         strokes: rectNode.strokes,
-      //         strokeWeight: rectNode.strokeWeight,
-      //       });
-      //     } else if (node.type === "ELLIPSE") {
-      //       const ellipseNode = node as EllipseNode;
-      //       Object.assign(data, {
-      //         width: ellipseNode.width,
-      //         height: ellipseNode.height,
-      //         fills: ellipseNode.fills,
-      //         strokes: ellipseNode.strokes,
-      //         strokeWeight: ellipseNode.strokeWeight,
-      //         arcData: ellipseNode.arcData,
-      //       });
-      //     } else if (node.type === "GROUP") {
-      //       const groupNode = node as GroupNode;
-      //       Object.assign(data, {
-      //         children: parseSelectedData(groupNode.children),
-      //       });
-      //     } else if (node.type === "LINE") {
-      //       const lineNode = node as LineNode;
-      //       Object.assign(data, {
-      //         width: lineNode.width,
-      //         strokes: lineNode.strokes,
-      //         strokeWeight: lineNode.strokeWeight,
-      //       });
-      //     } else if (node.type === "VECTOR") {
-      //       const vectorNode = node as VectorNode;
-      //       Object.assign(data, {
-      //         vectorPaths: vectorNode.vectorPaths,
-      //         fills: vectorNode.fills,
-      //         strokes: vectorNode.strokes,
-      //         strokeWeight: vectorNode.strokeWeight,
-      //       });
-      //     }
-    
-      //     return data;
-      //   })
-
-      // }
-
       const selectedFrameName = selection[0].name;
-
-      const frame = selection[0];
 
       const pngData = await frame.exportAsync({
         format: "PNG",
-        constraint: { type: "SCALE", value: 2 }
+        constraint: { type: "SCALE", value: 1 }
       });
 
       const base64PNG = figma.base64Encode(pngData);
@@ -277,6 +254,7 @@ const standardMode = async () => {
           name: selectedFrameName,
           url: responseData.url,
           figma_data: JSON.stringify(parseSelectedData(selection)),
+          frame_images: JSON.stringify(uploadResults),
           operation,
           canvas_id
         });
@@ -487,3 +465,94 @@ switch (figma.mode) {
   default:
     break;
 }
+
+
+// const parseSelectedData = (nodeList: any) => {
+      //   return nodeList.map((node: any) => {
+
+      //     const data: any = {
+      //       id: node.id,
+      //       name: node.name,
+      //       type: node.type,
+      //       visible: node.visible,
+      //       locked: node.locked,
+      //       parent: node.parent?.id || null,
+      //       x: node.x,
+      //       y: node.y,
+      //     };
+    
+      //     // Additional fields based on node type
+      //     if (node.type === "TEXT") {
+      //       const textNode = node as TextNode;
+      //       Object.assign(data, {
+      //         characters: textNode.characters,
+      //         fontSize: textNode.fontSize,
+      //         fontName: textNode.fontName,
+      //         textAlignHorizontal: textNode.textAlignHorizontal,
+      //         textAlignVertical: textNode.textAlignVertical,
+      //         lineHeight: textNode.lineHeight,
+      //         letterSpacing: textNode.letterSpacing,
+      //         fills: textNode.fills,
+      //       });
+      //     } else if (node.type === "FRAME") {
+      //       const frameNode = node as FrameNode;
+      //       Object.assign(data, {
+      //         children: frameNode.children.map((child) => child.id),
+      //         layoutMode: frameNode.layoutMode,
+      //         paddingLeft: frameNode.paddingLeft,
+      //         paddingRight: frameNode.paddingRight,
+      //         paddingTop: frameNode.paddingTop,
+      //         paddingBottom: frameNode.paddingBottom,
+      //         itemSpacing: frameNode.itemSpacing,
+      //         fills: frameNode.fills,
+      //         strokes: frameNode.strokes,
+      //         cornerRadius: frameNode.cornerRadius,
+      //       });
+      //     } else if (node.type === "RECTANGLE") {
+      //       const rectNode = node as RectangleNode;
+      //       Object.assign(data, {
+      //         width: rectNode.width,
+      //         height: rectNode.height,
+      //         cornerRadius: rectNode.cornerRadius,
+      //         fills: rectNode.fills,
+      //         strokes: rectNode.strokes,
+      //         strokeWeight: rectNode.strokeWeight,
+      //       });
+      //     } else if (node.type === "ELLIPSE") {
+      //       const ellipseNode = node as EllipseNode;
+      //       Object.assign(data, {
+      //         width: ellipseNode.width,
+      //         height: ellipseNode.height,
+      //         fills: ellipseNode.fills,
+      //         strokes: ellipseNode.strokes,
+      //         strokeWeight: ellipseNode.strokeWeight,
+      //         arcData: ellipseNode.arcData,
+      //       });
+      //     } else if (node.type === "GROUP") {
+      //       const groupNode = node as GroupNode;
+      //       Object.assign(data, {
+      //         children: parseSelectedData(groupNode.children),
+      //       });
+      //     } else if (node.type === "LINE") {
+      //       const lineNode = node as LineNode;
+      //       Object.assign(data, {
+      //         width: lineNode.width,
+      //         strokes: lineNode.strokes,
+      //         strokeWeight: lineNode.strokeWeight,
+      //       });
+      //     } else if (node.type === "VECTOR") {
+      //       const vectorNode = node as VectorNode;
+      //       Object.assign(data, {
+      //         vectorPaths: vectorNode.vectorPaths,
+      //         fills: vectorNode.fills,
+      //         strokes: vectorNode.strokes,
+      //         strokeWeight: vectorNode.strokeWeight,
+      //       });
+      //     }
+    
+      //     return data;
+      //   })
+
+      // }
+
+

@@ -195,11 +195,11 @@ export default function App() {
                 console.error("canvas_id is missing from selectedData");
                 return prevState;
               }
-              addFigmaToExistingProject(url, prevState.code, selectedData.canvas_id, selectedData.figma_data);
+              addFigmaToExistingProject(url, prevState.code, selectedData.canvas_id, selectedData.figma_data, selectedData.frame_images);
               return prevState;
             }
 
-            addFigmaToNewProject(url, prevState.code, name, selectedData.figma_data);
+            addFigmaToNewProject(url, prevState.code, name, selectedData.figma_data, selectedData.frame_images);
 
             return prevState;
           });
@@ -286,7 +286,7 @@ export default function App() {
   };
   // console.log("state.code", state.code.slice(0, 25));
 
-  const addFigmaToExistingProject = async (image_url: string, code: string, canvas_id: string, figma_data: string) => {
+  const addFigmaToExistingProject = async (image_url: string, code: string, canvas_id: string, figma_data: string, frame_images: string) => {
 
 
       if (!authTokens) {
@@ -305,7 +305,8 @@ export default function App() {
           figma_context: figma_data,
           initial_code: code,
           user_id: authTokens?.user_id,
-          image_url: image_url
+          image_url: image_url,
+          frame_images: frame_images
         }
         ),
       })
@@ -320,7 +321,7 @@ export default function App() {
 
   }
 
-  const addFigmaToNewProject = async (image_url: string, code: string, name: string, figma_data: string) => {
+  const addFigmaToNewProject = async (image_url: string, code: string, name: string, figma_data: string, frame_images: string) => {
 
     if (!authTokens) {
       console.error("Authorization tokens are missing");
@@ -353,7 +354,8 @@ export default function App() {
           figma_context: figma_data,
           initial_code: code,
           component_name: name,
-          image_url: image_url
+          image_url: image_url,
+          frame_images: frame_images,
         }),
       })
 
