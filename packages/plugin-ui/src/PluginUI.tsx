@@ -96,8 +96,8 @@ export const PluginUI = (props: PluginUIProps) => {
                       Choose Existing Project
                     </option>
                     {props.projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.title}
+                      <option key={project.project_id} value={project.project_id}>
+                        {project.title ?? "Untitled Project"}
                       </option>
                     ))}
                   </select>
@@ -121,12 +121,12 @@ export const PluginUI = (props: PluginUIProps) => {
               <div className="w-full h-20 overflow-scroll">
                 <p>Open in canvas:</p>
                 {filteredCanvases.map((canvas, idx) => (
-                  <button onClick={() => props.openTempo("existing", canvas.canvas_id)}>{canvas.project_name}</button>
+                  <button onClick={() => props.openTempo("existing", canvas.canvas_id)}>{canvas.name}</button>
                 ))}
               </div>
             )}
 
-            {isEmpty === false && (
+            {/* {isEmpty === false && (
               <div className="flex gap-2 justify-center flex-col p-2 dark:bg-black dark:bg-opacity-25 bg-neutral-100 ring-1 ring-neutral-200 dark:ring-neutral-700 rounded-lg text-sm">
                 <div className="flex gap-2 items-center flex-wrap">
                   {preferenceOptions
@@ -181,7 +181,7 @@ export const PluginUI = (props: PluginUIProps) => {
                   </>
                 )}
               </div>
-            )}
+            )} */}
 
             <div
               className={`rounded-lg ring-green-600 transition-all duratio overflow-clip ${
@@ -190,23 +190,23 @@ export const PluginUI = (props: PluginUIProps) => {
             >
               {isEmpty ? (
                 <h3>No layer is selected. Please select a layer.</h3>
-              ) : (
-                <SyntaxHighlighter
-                  language="dart"
-                  style={theme}
-                  customStyle={{
-                    fontSize: 12,
-                    borderRadius: 8,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    backgroundColor: syntaxHovered ? "#1E2B1A" : "#1B1B1B",
-                    transitionProperty: "all",
-                    transitionTimingFunction: "ease",
-                    transitionDuration: "0.2s",
-                  }}
-                >
-                  {props.code}
-                </SyntaxHighlighter>
+              ) : ( <></>
+                // <SyntaxHighlighter
+                //   language="dart"
+                //   style={theme}
+                //   customStyle={{
+                //     fontSize: 12,
+                //     borderRadius: 8,
+                //     marginTop: 0,
+                //     marginBottom: 0,
+                //     backgroundColor: syntaxHovered ? "#1E2B1A" : "#1B1B1B",
+                //     transitionProperty: "all",
+                //     transitionTimingFunction: "ease",
+                //     transitionDuration: "0.2s",
+                //   }}
+                // >
+                //   {props.code}
+                // </SyntaxHighlighter>
               )}
             </div>
           </div>
