@@ -13,7 +13,8 @@ import {
   ReturnSelectedDataMessage,
   AuthMessage,
   Warning,
-  Canvas
+  Canvas,
+  Project
 } from "types";
 import { postUISettingsChangingMessage, triggerOpenTempo } from "./messaging";
 import axios from "axios";
@@ -81,8 +82,8 @@ export default function App() {
     null
   );
 
-  const [canvases, setCanvases] = useState<any[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [canvases, setCanvases] = useState<Canvas[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   // temp wrapper function to avoid prop drilling supabase JWT
   const tempTriggerOpenTempoWrapper = (supabaseJWT: string) => {
@@ -385,10 +386,6 @@ export default function App() {
           colors={state.colors}
           gradients={state.gradients}
           openTempo={tempTriggerOpenTempoWrapper(authTokens.supabase_token)}
-          // userCanvases={canvases.map((canvas) => ({
-          //   canvas_id: canvas.id,
-          //   project_name: canvas.project_name,
-          // }))}
           projects={projects}
           canvases={canvases}
         />

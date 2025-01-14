@@ -14,7 +14,8 @@ import {
   PluginSettings,
   SolidColorConversion,
   Warning,
-  Canvas
+  Canvas,
+  Project
 } from "types";
 import {
   preferenceOptions,
@@ -32,8 +33,8 @@ type PluginUIProps = {
   colors: SolidColorConversion[];
   gradients: LinearGradientConversion[];
   openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
-  projects: any[];
-  canvases: any[];
+  projects: Project[];
+  canvases: Canvas[];
 };
 
 const frameworks: Framework[] = ["HTML", "Tailwind", "Flutter", "SwiftUI"];

@@ -220,5 +220,12 @@ export interface LocalCodegenPreferenceOptions extends PreferenceOptions {
 
 export interface Canvas {
   canvas_id: string;
-  project_name: string;
+  project_id: string;
+  name: string;
+}
+
+export interface Project {
+  project_id: string,
+  title: string,
+
 }
