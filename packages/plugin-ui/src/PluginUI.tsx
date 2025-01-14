@@ -119,20 +119,23 @@ export const PluginUI = (props: PluginUIProps) => {
               </div>
             )}
 
-            {selectedProject ? (
-              <div className="w-full h-20 overflow-scroll">
-                <p>Open in canvas:</p>
-                {filteredCanvases.map((canvas, idx) => (
-                  <button onClick={() => props.openTempo("existing", canvas.canvas_id)}>{canvas.name}</button>
-                ))}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <p>Canvases</p>
+                <div className="h-0.5 w-full bg-neutral-700"></div>
               </div>
-            ) : <p>No Project Selected</p>}
+              {selectedProject ? (
+                <div className="w-full h-20 overflow-y-scroll" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+                  {filteredCanvases.map((canvas, idx) => (
+                    <button onClick={() => props.openTempo("existing", canvas.canvas_id)}>{canvas.name}</button>
+                  ))}
+                </div>
+              ) : <p>No Project Selected</p>}
+            </div>
 
             
             <div
-              className={`rounded-lg ring-green-600 transition-all duratio overflow-clip ${
-                syntaxHovered ? "ring-2" : "ring-0"
-              }`}
+              className={`rounded-lg ring-green-600 transition-all duratio overflow-clip ring-0`}
             >
               {isEmpty && (
                 <h3>No layer is selected. Please select a layer.</h3>

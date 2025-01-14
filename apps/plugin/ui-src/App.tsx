@@ -122,8 +122,7 @@ export default function App() {
     if (authTokens && supabaseClient) {
       const fetchCanvases = async () => {
         const { data, error } = await supabaseClient
-          .from("project_canvas_mappings")
-          .select("*")
+          .rpc("get_project_canvas_mappings")
           .eq("owner_user_id", authTokens.user_id)
           .eq("env", "DEV");
 
