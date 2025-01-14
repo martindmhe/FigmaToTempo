@@ -163,7 +163,7 @@ const standardMode = async () => {
         Authorization: `Bearer ${supabaseJWT}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ file: base64, fileName: `${fileName}` })
+      body: JSON.stringify({ folderPath: "figma-exports/", file: base64, fileName: `${fileName}` })
       });
           const { url: publicUrl } = await response.json();
     
@@ -244,7 +244,7 @@ const standardMode = async () => {
             "Content-Type": "application/json"
 
           },
-          body: JSON.stringify({ file: base64PNG, fileName: `${selectedFrameName.replace(' ', '_').toLowerCase()}.png` })
+          body: JSON.stringify({ folderPath: "figma-exports/", file: base64PNG, fileName: `${selectedFrameName.replace(' ', '_').toLowerCase()}.png` })
         });
         const responseData = await response.json();
         console.log("Image upload response:", responseData);
