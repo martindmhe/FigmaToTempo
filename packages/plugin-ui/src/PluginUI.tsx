@@ -86,10 +86,22 @@ export const PluginUI = (props: PluginUIProps) => {
          
           <div className="w-full flex flex-col gap-2 mt-2">
             {isEmpty === false && (
-              <div className="flex items-center gap-4 w-full">
-                <div className="flex flex-col gap-2 relative">
+              <div className="flex flex-col items-start gap-1 w-full">
+                <button
+                  className={`w-1/2 py-2 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
+                    isPressed
+                      ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
+                      : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
+                  }`}
+                  onClick={() => props.openTempo("new")}
+                  onMouseEnter={handleButtonHover}
+                  onMouseLeave={handleButtonLeave}
+                >
+                  Open in new Tempo app
+                </button>
+                <div className="flex flex-col w-1/2 gap-2 relative">
                   <select
-                    className="px-4 py-1 text-sm text-white bg-neutral-700 font-semibold border border-green-500 rounded-md shadow-sm"
+                    className="py-2 w-full text-center text-sm text-white bg-neutral-700 font-semibold border border-neutral-600 rounded-md shadow-sm"
                     onChange={(e) => handleProjectChange(e.target.value)}
                   >
                     <option value="" disabled selected>
@@ -102,132 +114,30 @@ export const PluginUI = (props: PluginUIProps) => {
                     ))}
                   </select>
                 </div>
-                <button
-                  className={`px-4 py-1 text-sm font-semibold border border-green-500 rounded-md shadow-sm hover:bg-green-500 dark:hover:bg-green-600 hover:text-white hover:border-transparent transition-all duration-300 ${
-                    isPressed
-                      ? "bg-green-500 dark:text-white hover:bg-green-500 ring-4 ring-green-300 ring-opacity-50 animate-pulse"
-                      : "bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border-neutral-300 dark:border-neutral-600"
-                  }`}
-                  onClick={() => props.openTempo("new")}
-                  onMouseEnter={handleButtonHover}
-                  onMouseLeave={handleButtonLeave}
-                >
-                  Open in new Tempo app
-                </button>
+                
               </div>
             )}
 
-            {selectedProject && (
+            {selectedProject ? (
               <div className="w-full h-20 overflow-scroll">
                 <p>Open in canvas:</p>
                 {filteredCanvases.map((canvas, idx) => (
                   <button onClick={() => props.openTempo("existing", canvas.canvas_id)}>{canvas.name}</button>
                 ))}
               </div>
-            )}
+            ) : <p>No Project Selected</p>}
 
-            {/* {isEmpty === false && (
-              <div className="flex gap-2 justify-center flex-col p-2 dark:bg-black dark:bg-opacity-25 bg-neutral-100 ring-1 ring-neutral-200 dark:ring-neutral-700 rounded-lg text-sm">
-                <div className="flex gap-2 items-center flex-wrap">
-                  {preferenceOptions
-                    .filter((preference) =>
-                      preference.includedLanguages?.includes(props.selectedFramework),
-                    )
-                    .map((preference) => (
-                      <SelectableToggle
-                        key={preference.propertyName}
-                        title={preference.label}
-                        description={preference.description}
-                        isSelected={
-                          props.settings?.[preference.propertyName] ?? preference.isDefault
-                        }
-                        onSelect={(value) => {
-                          props.onPreferenceChanged(preference.propertyName, value);
-                        }}
-                        buttonClass="bg-green-100 dark:bg-black dark:ring-green-800 ring-green-500"
-                        checkClass="bg-green-400 dark:bg-black dark:bg-green-500 dark:border-green-500 ring-green-300 border-green-400"
-                      />
-                    ))}
-                </div>
-                {selectableSettingsFiltered.length > 0 && (
-                  <>
-                    <div className="w-full h-px bg-neutral-200 dark:bg-neutral-700" />
-
-                    <div className="flex gap-2 items-center flex-wrap">
-                      {selectableSettingsFiltered.map((preference) => (
-                        <>
-                          {preference.options.map((option) => (
-                            <SelectableToggle
-                              key={option.label}
-                              title={option.label}
-                              isSelected={
-                                option.value ===
-                                (props.settings?.[preference.propertyName] ??
-                                  option.isDefault)
-                              }
-                              onSelect={() => {
-                                props.onPreferenceChanged(
-                                  preference.propertyName,
-                                  option.value,
-                                );
-                              }}
-                              buttonClass="bg-blue-100 dark:bg-black dark:ring-blue-800"
-                              checkClass="bg-blue-400 dark:bg-black dark:bg-blue-500 dark:border-blue-500 ring-blue-300 border-blue-400"
-                            />
-                          ))}
-                        </>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            )} */}
-
+            
             <div
               className={`rounded-lg ring-green-600 transition-all duratio overflow-clip ${
                 syntaxHovered ? "ring-2" : "ring-0"
               }`}
             >
-              {isEmpty ? (
+              {isEmpty && (
                 <h3>No layer is selected. Please select a layer.</h3>
-              ) : ( <></>
-                // <SyntaxHighlighter
-                //   language="dart"
-                //   style={theme}
-                //   customStyle={{
-                //     fontSize: 12,
-                //     borderRadius: 8,
-                //     marginTop: 0,
-                //     marginBottom: 0,
-                //     backgroundColor: syntaxHovered ? "#1E2B1A" : "#1B1B1B",
-                //     transitionProperty: "all",
-                //     transitionTimingFunction: "ease",
-                //     transitionDuration: "0.2s",
-                //   }}
-                // >
-                //   {props.code}
-                // </SyntaxHighlighter>
               )}
             </div>
           </div>
-
-          {/* {props.colors.length > 0 && (
-            <ColorsPanel
-              colors={props.colors}
-              onColorClick={(value) => {
-                copy(value);
-              }}
-            />
-          )}
-
-          {props.gradients.length > 0 && (
-            <GradientsPanel
-              gradients={props.gradients}
-              onColorClick={(value) => {
-                copy(value);
-              }}
-            />
-          )} */}
         </div>
       </div>
     </div>
