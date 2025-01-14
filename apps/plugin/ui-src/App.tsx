@@ -147,7 +147,6 @@ export default function App() {
 
       fetchCanvases();
     }
-    console.log(canvases, projects)
   }, [authTokens, supabaseClient]);
 
   const rootStyles = getComputedStyle(document.documentElement);
@@ -375,9 +374,9 @@ export default function App() {
       <div className={`${figmaColorBgValue === "#ffffff" ? "" : "dark"}`}>
         <PluginUI
           code={state.code}
-          warnings={state.warnings}
-          selectedFramework={state.selectedFramework}
-          setSelectedFramework={handleFrameworkChange}
+          warnings={[]}
+          selectedFramework={"Tailwind"}
+          setSelectedFramework={() => {}}
           htmlPreview={state.htmlPreview}
           settings={state.settings}
           onPreferenceChanged={(key: string, value: boolean | string) =>
@@ -386,10 +385,10 @@ export default function App() {
           colors={state.colors}
           gradients={state.gradients}
           openTempo={tempTriggerOpenTempoWrapper(authTokens.supabase_token)}
-          userCanvases={canvases.map((canvas) => ({
-            canvas_id: canvas.id,
-            project_name: canvas.project_name,
-          }))}
+          // userCanvases={canvases.map((canvas) => ({
+          //   canvas_id: canvas.id,
+          //   project_name: canvas.project_name,
+          // }))}
           projects={projects}
           canvases={canvases}
         />

@@ -65,7 +65,7 @@ const CodePanel = (props: CodePanelProps) => {
 
   return (
     <div className="w-full flex flex-col gap-2 mt-2">
-      <div className="flex items-center justify-between w-full">
+      {/* <div className="flex items-center justify-between w-full">
         <p className="text-lg font-medium text-center dark:text-white rounded-lg">
           Code
         </p>
@@ -85,7 +85,7 @@ const CodePanel = (props: CodePanelProps) => {
             </button>
           </>
         )}
-      </div>
+      </div> */}
       {isEmpty === false && (
         <div className="flex items-center gap-4 w-full">
           <div className="flex flex-col gap-2 relative">
@@ -94,13 +94,11 @@ const CodePanel = (props: CodePanelProps) => {
               onChange={(e) => handleProjectChange(e.target.value)}
             >
               <option value="">Choose Existing Project</option>
-              {props.projects.map((project) => { 
-                console.log(project)
-                return (
+              {props.projects.map((project) => (
                 <option key={project.project_id} value={project.project_id}>
                   {project.title ?? "Untitled Project"}
                 </option>
-              )})}
+              ))}
             </select>
             
           </div>
@@ -120,70 +118,14 @@ const CodePanel = (props: CodePanelProps) => {
       )}
 
       {selectedProject && (
-        <div className="w-full h-20 overflow-scroll">
+        <div className="w-full h-20 overflow-scroll scrollbar-hide" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
           <p>Open in canvas:</p>
           {filteredCanvases.map((canvas, idx) => (
-            <button onClick={() => props.openTempo("existing", canvas.canvas_id)}>{canvas.name}</button>
+        <button onClick={() => props.openTempo("existing", canvas.canvas_id)}>{canvas.name}</button>
           ))}
         </div>
       )}
 
-      {isEmpty === false && (
-        <div className="flex gap-2 justify-center flex-col p-2 dark:bg-black dark:bg-opacity-25 bg-neutral-100 ring-1 ring-neutral-200 dark:ring-neutral-700 rounded-lg text-sm">
-          <div className="flex gap-2 items-center flex-wrap">
-            {preferenceOptions
-              .filter((preference) =>
-                preference.includedLanguages?.includes(selectedFramework),
-              )
-              .map((preference) => (
-                <SelectableToggle
-                  key={preference.propertyName}
-                  title={preference.label}
-                  description={preference.description}
-                  isSelected={
-                    settings?.[preference.propertyName] ?? preference.isDefault
-                  }
-                  onSelect={(value) => {
-                    onPreferenceChanged(preference.propertyName, value);
-                  }}
-                  buttonClass="bg-green-100 dark:bg-black dark:ring-green-800 ring-green-500"
-                  checkClass="bg-green-400 dark:bg-black dark:bg-green-500 dark:border-green-500 ring-green-300 border-green-400"
-                />
-              ))}
-          </div>
-          {selectableSettingsFiltered.length > 0 && (
-            <>
-              <div className="w-full h-px bg-neutral-200 dark:bg-neutral-700" />
-
-              <div className="flex gap-2 items-center flex-wrap">
-                {selectableSettingsFiltered.map((preference) => (
-                  <>
-                    {preference.options.map((option) => (
-                      <SelectableToggle
-                        key={option.label}
-                        title={option.label}
-                        isSelected={
-                          option.value ===
-                          (settings?.[preference.propertyName] ??
-                            option.isDefault)
-                        }
-                        onSelect={() => {
-                          onPreferenceChanged(
-                            preference.propertyName,
-                            option.value,
-                          );
-                        }}
-                        buttonClass="bg-blue-100 dark:bg-black dark:ring-blue-800"
-                        checkClass="bg-blue-400 dark:bg-black dark:bg-blue-500 dark:border-blue-500 ring-blue-300 border-blue-400"
-                      />
-                    ))}
-                  </>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
 
       <div
         className={`rounded-lg ring-green-600 transition-all duratio overflow-clip ${

@@ -32,7 +32,7 @@ type PluginUIProps = {
   gradients: LinearGradientConversion[];
   // temporary prop drilling
   openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
-  userCanvases: Canvas[];
+  // userCanvases: Canvas[];
   projects: any[];
   canvases: any[];
 };
@@ -48,7 +48,7 @@ export const PluginUI = (props: PluginUIProps) => {
   return (
     <div className="flex flex-col h-full dark:text-white">
       <div className="p-2 grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 gap-1">
-        {frameworks.map((tab) => (
+        {/* {frameworks.map((tab) => (
           <button
             key={`tab ${tab}`}
             className={`w-full p-1 text-sm ${
@@ -62,7 +62,7 @@ export const PluginUI = (props: PluginUIProps) => {
           >
             {tab}
           </button>
-        ))}
+        ))} */}
       </div>
       <div
         style={{
@@ -105,12 +105,11 @@ export const PluginUI = (props: PluginUIProps) => {
             settings={props.settings}
             onPreferenceChanged={props.onPreferenceChanged}
             openTempo={props.openTempo}
-            userCanvases={props.userCanvases}
             projects={props.projects}
             canvases={props.canvases}
           />
 
-          {props.colors.length > 0 && (
+          {/* {props.colors.length > 0 && (
             <ColorsPanel
               colors={props.colors}
               onColorClick={(value) => {
@@ -126,7 +125,7 @@ export const PluginUI = (props: PluginUIProps) => {
                 copy(value);
               }}
             />
-          )}
+          )} */}
         </div>
       </div>
     </div>
