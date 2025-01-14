@@ -33,6 +33,8 @@ type PluginUIProps = {
   // temporary prop drilling
   openTempo: (operation: "new" | "existing", canvas_id?: string) => void;
   userCanvases: Canvas[];
+  projects: any[];
+  canvases: any[];
 };
 
 const frameworks: Framework[] = ["HTML", "Tailwind", "Flutter", "SwiftUI"];
@@ -104,6 +106,8 @@ export const PluginUI = (props: PluginUIProps) => {
             onPreferenceChanged={props.onPreferenceChanged}
             openTempo={props.openTempo}
             userCanvases={props.userCanvases}
+            projects={props.projects}
+            canvases={props.canvases}
           />
 
           {props.colors.length > 0 && (

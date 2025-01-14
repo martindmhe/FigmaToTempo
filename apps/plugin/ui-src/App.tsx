@@ -16,7 +16,6 @@ import {
   Canvas
 } from "types";
 import { postUISettingsChangingMessage, triggerOpenTempo } from "./messaging";
-import callOpenAI from "../../../packages/backend/src/ai/openai";
 import axios from "axios";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 
@@ -42,10 +41,6 @@ interface AuthTokens {
 
 const emptyPreview = { size: { width: 0, height: 0 }, content: "" };
 
-const returnEditedCode = async (code: string) => {
-  const response = await callOpenAI(`${code}, This code was generated from Figma. Please refactor it to be production-ready, ensuring best practices are followed, and return only the updated code in plain text format. Do not include explanations, comments, or markdown.`)
-  return response.replace(/```[a-z]*\n?|\n?```/g, '')
-}
 
 const processFigmaData = (figmaData: ParentNode) => {
   const processNode = (node: any, indent: string = ''): string => {
@@ -87,6 +82,7 @@ export default function App() {
   );
 
   const [canvases, setCanvases] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
 
   // temp wrapper function to avoid prop drilling supabase JWT
   const tempTriggerOpenTempoWrapper = (supabaseJWT: string) => {
@@ -125,13 +121,8 @@ export default function App() {
     if (authTokens && supabaseClient) {
       const fetchCanvases = async () => {
         const { data, error } = await supabaseClient
-          .from("canvases")
-          .select(`
-            *,
-            projects:project_id (
-              name
-            )
-          `)
+          .from("project_canvas_mappings")
+          .select("*")
           .eq("owner_user_id", authTokens.user_id)
           .eq("env", "DEV");
 
@@ -140,17 +131,23 @@ export default function App() {
         }
 
         if (data) {
-          const canvasesWithProjectNames = data.map(canvas => ({
-            ...canvas,
-            project_name: canvas.projects?.name
-          }));
-          setCanvases(canvasesWithProjectNames);
-          console.log("canvases:", canvasesWithProjectNames);
+          console.log(data)
+          setProjects(data.map((mapping) => ({
+              project_id: mapping.project_id,
+              title: mapping.title,
+            })));
+
+          setCanvases(data.map((mapping) => ({
+            project_id: mapping.project_id,
+            canvas_id: mapping.canvas_id,
+            name: mapping.name,
+          })))
         }
       };
 
       fetchCanvases();
     }
+    console.log(canvases, projects)
   }, [authTokens, supabaseClient]);
 
   const rootStyles = getComputedStyle(document.documentElement);
@@ -368,6 +365,10 @@ export default function App() {
       window.open(`${base_url}?figmaContextId=${id}`, '_blank');
   }
 
+  const filterCanvasesByProject = (projectId: string) => {
+    return canvases.filter((canvas) => canvas.project_id === projectId);
+  };
+
   if (authTokens) {
 
     return (
@@ -385,7 +386,12 @@ export default function App() {
           colors={state.colors}
           gradients={state.gradients}
           openTempo={tempTriggerOpenTempoWrapper(authTokens.supabase_token)}
-          userCanvases={canvases.map((canvas) => ({canvas_id: canvas.id, project_name: canvas.project_name}))}
+          userCanvases={canvases.map((canvas) => ({
+            canvas_id: canvas.id,
+            project_name: canvas.project_name,
+          }))}
+          projects={projects}
+          canvases={canvases}
         />
       </div>
     );
