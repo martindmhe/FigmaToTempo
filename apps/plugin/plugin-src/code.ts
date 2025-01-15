@@ -266,12 +266,12 @@ const standardMode = async () => {
     if (msg.type === "auth") {
 
       // temporarily remove auth token caching for testing
-      const user_auth = await figma.clientStorage.getAsync("auth_token");
-      if (user_auth) {
-        console.log("cached token found");
-        figma.ui.postMessage({ type: "auth_token", user_auth });
-        return;
-      }
+      // const user_auth = await figma.clientStorage.getAsync("auth_token");
+      // if (user_auth) {
+      //   console.log("cached token found");
+      //   figma.ui.postMessage({ type: "auth_token", user_auth });
+      //   return;
+      // }
 
       const keysResponse = await fetch("http://localhost:3001/figma/auth/generateKeys");
       const { read_key, write_key } = await keysResponse.json();
@@ -297,6 +297,13 @@ const standardMode = async () => {
           const response = await fetch(`http://localhost:3001/figma/auth/${read_key}`);
           const data = await response.json();
           console.log("Auth check response:", data);
+          if (!response.ok && data.code === "token_expired") {
+
+            figma.notify("Authentication token expired. Please try again.")
+            figma.showUI(__html__, { width: 450, height: 700, themeColors: true })
+            return;
+          }
+
           if (data.supabase_token && data.github_token) {
             
             const { github_token, supabase_token, user_id } = data;
