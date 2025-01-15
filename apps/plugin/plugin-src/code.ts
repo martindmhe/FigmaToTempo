@@ -286,7 +286,7 @@ const standardMode = async () => {
             <h1>Loading...</h1>
             <script>
               console.log("test")
-              window.location.href = "http://localhost:3001/figma/auth/login?write_key=${write_key}";
+              window.open("http://localhost:3001/figma/auth/login?write_key=${write_key}");
             </script>
           </body>
         </html>
